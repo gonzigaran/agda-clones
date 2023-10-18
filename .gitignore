@@ -1,0 +1,13 @@
+_build/
+*.agda.el
+*.agdai
+*.hi
+*.lagda.el
+*.o
+.stack-work
+*.svg
+*.tix
+*.vim
+*~
+.*.swp
+
