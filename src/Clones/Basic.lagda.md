@@ -10,19 +10,23 @@ author: "Gonzalo Zigarán"
 
 ```agda
 
-module Clones.Basic where
-
 open import Agda.Primitive               using () renaming ( Set to Type )
-open import Level                        using ( _⊔_ ; Level  )
-open import Data.Nat                     using ( ℕ )
-open import Data.Fin
-open import Data.Product     using ( Σ-syntax )
+open import Level                        using ( _⊔_ ; Level ; suc )
 
-open import Overture.Operations          using ( Op ; arity[_] )
+module Clones.Basic (α : Level) (A : Type α) where
+
+open import Data.Nat                     using ( ℕ )
+open import Data.Fin                     using ( Fin )
+open import Data.Product                 using ( Σ-syntax ; proj₂ ; _,_)
+
+open import Overture.Operations          using ( Op )
 open import Base.Relations.Continuous    using ( Rel )
 
-private variable α ρ : Level
-private variable A : Type α 
+-- private variable ρ : Level
+
+-- Para subconjuntos
+Pred : {ρ β : Level} → Type ρ → Type (ρ ⊔ suc β)
+Pred {β = β} X = X → Type β 
 
 -- Operaciones de aridad finita
 FinOp : { n : ℕ} → Type α → Type α 
@@ -32,24 +36,45 @@ FinOps : Type α → Type α
 FinOps A = Σ[ n ∈ ℕ ] (FinOp {n = n} A)
 
 -- Funcion proyeccion, proyecta en la coordenada dada, infiere la aridad
-proj : { n : ℕ } → Fin n → FinOp A
-proj k = λ x → x k
+π : { n : ℕ } → Fin n → FinOp A
+π k = λ x → x k 
+
+record Clon : Type (suc α)  where
+  field
+    set : Pred (FinOps A)
+    contains_π : ∀ (n : ℕ) → ∀ (k : Fin n) → set ( n , (π {n} k) )
+    comp_closed : {!!}
 
 -- Relaciones de aridad finita
-FinRel : { n : ℕ } → Type α → { ρ : Level } → Type (α ⊔ Level.suc ρ)
+FinRel : { n : ℕ } → Type α → { ρ : Level } → Type (α ⊔ suc ρ)
 FinRel { n = n } A { ρ = ρ } = Rel A (Fin n) {ρ}
 
-FinRels : Type α → { ρ : Level } → Type (α ⊔ Level.suc ρ)
+FinRels : Type α → { ρ : Level } → Type (α ⊔ suc ρ)
 FinRels A {ρ} = Σ[ n ∈ ℕ ] (FinRel {n = n} A {ρ = ρ})
 
 -- Se fija que k vectores de largo n, coordeanada a coordenada, pertenezcan a la relación de aridad k
-evalFinRel : { k : ℕ } { A : Type α } → FinRel { n = k} A { ρ = ρ } → ( n : ℕ) → (Fin k → Fin n → A) → Type ρ
+evalFinRel : { k : ℕ } { A : Type α } {ρ : Level}  → FinRel { n = k} A { ρ = ρ } → ( n : ℕ) → (Fin k → Fin n → A) → Type ρ
 evalFinRel r n t = ∀ (j : Fin n) → r λ i → t i j 
 
 -- f preserva la relacion r
-_◃_ : { n k : ℕ } { A : Type α } → FinOp {n = n} A → FinRel {n = k} A {ρ = ρ} → Type (α ⊔ ρ) 
+_◃_ : { n k : ℕ } { A : Type α } → FinOp {n = n} A → {ρ : Level} → FinRel {n = k} A {ρ = ρ} → Type (α ⊔ ρ) 
 _◃_ { n = n} f r = ∀ t → evalFinRel r n t → r λ i → f (t i)
 
+-- invariantes de un conjunto de operaciones F
+invₙ : {n : ℕ} → Pred (FinOps A) → {ρ : Level} → Pred (FinRel {n} A {ρ})
+invₙ {n} F = λ r → ∀ f → F f → (proj₂ f) ◃ r
+
+inv : Pred (FinOps A) → {ρ : Level} → Pred (FinRels A {ρ})  
+inv F = λ r → ∀ f → F f → (proj₂ f) ◃ (proj₂ r)
+-- inv F {ρ} = Σ[ n ∈ ℕ ] (invₙ {n = n} F {ρ = ρ})
+
+
+-- polimorfismos de un conjunto de relaciones R
+polₙ : {n : ℕ} {ρ : Level} → Pred (FinRels A {ρ}) → Pred (FinOp {n} A)
+polₙ {n} R = λ f → ∀ r → R r → f ◃ (proj₂ r)
+
+pol : {ρ : Level} → Pred (FinRels A {ρ}) → Pred (FinOps A) 
+pol R = λ f → ∀ r → R r →  (proj₂ f) ◃ (proj₂ r) 
 
 
 
@@ -92,4 +117,3 @@ _◃_ { n = n} f r = ∀ t → evalFinRel r n t → r λ i → f (t i)
 -- toOp (suc n) f g = toOp n (f (g zero)) (λ k -> g (suc k))
 
 
-```
