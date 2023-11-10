@@ -17,19 +17,27 @@ module Clones.Basic (α : Level) (A : Type α) where
 
 open import Data.Nat                     using ( ℕ )
 open import Data.Fin                     using ( Fin )
-open import Data.Product                 using ( Σ-syntax ; proj₂ ; _,_)
+open import Data.Product                 using ( Σ-syntax ; proj₁ ; proj₂ ; _,_ ; ∃ ; ∃-syntax)
+open import Relation.Unary       using ( Pred ; _∈_ ; _⊆_ )
+
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl; trans; sym; cong; cong-app; subst)
+open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
 open import Overture.Operations          using ( Op )
 open import Base.Relations.Continuous    using ( Rel )
 
--- private variable ρ : Level
+private variable ρ β 𝓧 : Level
 
 -- Para subconjuntos
-Pred : {ρ β : Level} → Type ρ → Type (ρ ⊔ suc β)
-Pred {β = β} X = X → Type β 
+-- Pred : {ρ β : Level} → Type ρ → Type (ρ ⊔ suc β)
+-- Pred {β = β} X = X → Type β 
+-- The type of operations on A of arity I
+-- Op : Type α → Type 𝓥 → Type (α ⊔ 𝓥)
+-- Op A I = (I → A) → A
 
 -- Operaciones de aridad finita
-FinOp : { n : ℕ} → Type α → Type α 
+FinOp : { n : ℕ} → Type α → Type α
 FinOp { n = n } A = Op A (Fin n)
 
 FinOps : Type α → Type α
@@ -39,42 +47,78 @@ FinOps A = Σ[ n ∈ ℕ ] (FinOp {n = n} A)
 π : { n : ℕ } → Fin n → FinOp A
 π k = λ x → x k 
 
-record Clon : Type (suc α)  where
+-- Definimos Clones 
+containsProjections : Pred (FinOps A) ρ → Type ρ
+containsProjections F = ∀ (n : ℕ) → ∀ (k : Fin n) → F ( n , π {n = n} k )
+
+containsCompositions : Pred (FinOps A) ρ → Type (α ⊔ ρ)
+containsCompositions F = (n m : ℕ)(f : FinOp {m} A )(gs : (Fin m → FinOp {n} A)) → F ( n , λ xs → f (λ i → gs i xs) )
+
+isClon : Pred (FinOps A) ρ → Type (α ⊔ ρ)
+isClon F = containsProjections F → containsCompositions F
+
+Clones : Pred (Pred (FinOps A) ρ) (α ⊔ ρ)
+Clones = λ F → isClon F 
+
+record Clon : Type (α ⊔ suc ρ) where
+  constructor mkclon
   field
-    set : Pred (FinOps A)
-    contains_π : ∀ (n : ℕ) → ∀ (k : Fin n) → set ( n , (π {n} k) )
-    comp_closed : {!!}
+    F  : Pred (FinOps A) ρ
+    FIsClon : F ∈ Clones
+
+
+open import Base.Algebras.Basic using ( Algebra )
+
+-- Algebra : (α : Level) → Type (𝓞 ⊔ 𝓥 ⊔ suc α)
+-- Algebra α =  Σ[ A ∈ Type α ]                 -- the domain
+--              ∀ (f : ∣ 𝑆 ∣) → Op A (∥ 𝑆 ∥ f)  -- the basic operations
+
+-- Subuniverses : (𝑨 : Algebra α) → Pred (Pred ∣ 𝑨 ∣ β) (𝓞 ⊔ 𝓥 ⊔ α ⊔ β)
+-- Subuniverses 𝑨 B = (𝑓 : ∣ 𝑆 ∣)(𝑎 : ∥ 𝑆 ∥ 𝑓 → ∣ 𝑨 ∣) → Im 𝑎 ⊆ B → (𝑓 ̂ 𝑨) 𝑎 ∈ B
+
 
 -- Relaciones de aridad finita
-FinRel : { n : ℕ } → Type α → { ρ : Level } → Type (α ⊔ suc ρ)
-FinRel { n = n } A { ρ = ρ } = Rel A (Fin n) {ρ}
+FinRel : { n : ℕ } → Type α → Type (suc α)
+FinRel { n = n } A  = Rel A (Fin n)
 
-FinRels : Type α → { ρ : Level } → Type (α ⊔ suc ρ)
-FinRels A {ρ} = Σ[ n ∈ ℕ ] (FinRel {n = n} A {ρ = ρ})
+FinRels : Type α → Type (suc α)
+FinRels A = Σ[ n ∈ ℕ ] (FinRel {n} A)
 
 -- Se fija que k vectores de largo n, coordeanada a coordenada, pertenezcan a la relación de aridad k
-evalFinRel : { k : ℕ } { A : Type α } {ρ : Level}  → FinRel { n = k} A { ρ = ρ } → ( n : ℕ) → (Fin k → Fin n → A) → Type ρ
+evalFinRel : { k : ℕ } → FinRel { n = k} A  → ( n : ℕ) → (Fin k → Fin n → A) → Type α
 evalFinRel r n t = ∀ (j : Fin n) → r λ i → t i j 
 
 -- f preserva la relacion r
-_◃_ : { n k : ℕ } { A : Type α } → FinOp {n = n} A → {ρ : Level} → FinRel {n = k} A {ρ = ρ} → Type (α ⊔ ρ) 
+_◃_ : { n k : ℕ } → FinOp {n = n} A → FinRel {n = k} A → Type α
 _◃_ { n = n} f r = ∀ t → evalFinRel r n t → r λ i → f (t i)
 
--- invariantes de un conjunto de operaciones F
-invₙ : {n : ℕ} → Pred (FinOps A) → {ρ : Level} → Pred (FinRel {n} A {ρ})
-invₙ {n} F = λ r → ∀ f → F f → (proj₂ f) ◃ r
+-- Lema 3 a) sii b)
+open import Base.Subalgebras.Subuniverses using ( Subuniverses )
 
-inv : Pred (FinOps A) → {ρ : Level} → Pred (FinRels A {ρ})  
-inv F = λ r → ∀ f → F f → (proj₂ f) ◃ (proj₂ r)
+-- preserv-iff-r-subuniv : ∀ {n k : ℕ} (f : FinOp { n} A) (r : FinRel {k} A)
+--      → (f ◃ r)
+--   → (f ◃ r) ≡ (r ∈ Subuniverses (A , ))
+-- preserv-iff-r-subuniv f r = {!!}
+
+
+
+
+
+-- invariantes de un conjunto de operaciones F
+invₙ : {n : ℕ} → Pred (FinOps A) ρ → Pred (FinRel {n = n} A) (α ⊔ ρ)
+invₙ F = λ r → ∀ f → f ∈ F → (proj₂ f) ◃ r
+
+inv : Pred (FinOps A) ρ → Pred (FinRels A) (α ⊔ ρ)
+inv F = λ r → ∀ f → f ∈ F → (proj₂ f) ◃ (proj₂ r)
 -- inv F {ρ} = Σ[ n ∈ ℕ ] (invₙ {n = n} F {ρ = ρ})
 
 
 -- polimorfismos de un conjunto de relaciones R
-polₙ : {n : ℕ} {ρ : Level} → Pred (FinRels A {ρ}) → Pred (FinOp {n} A)
-polₙ {n} R = λ f → ∀ r → R r → f ◃ (proj₂ r)
+polₙ : {n : ℕ} → Pred (FinRels A) ρ → Pred (FinOp {n = n} A) (suc α ⊔ ρ)
+polₙ R = λ f → ∀ r → r ∈ R → f ◃ (proj₂ r)
 
-pol : {ρ : Level} → Pred (FinRels A {ρ}) → Pred (FinOps A) 
-pol R = λ f → ∀ r → R r →  (proj₂ f) ◃ (proj₂ r) 
+pol : Pred (FinRels A) ρ → Pred (FinOps A) (suc α ⊔ ρ)
+pol R = λ f → ∀ r → r ∈ R →  (proj₂ f) ◃ (proj₂ r) 
 
 
 
