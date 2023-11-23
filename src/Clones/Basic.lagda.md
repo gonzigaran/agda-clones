@@ -17,7 +17,7 @@ module Clones.Basic (α : Level) (A : Type α) where
 
 open import Data.Nat                     using ( ℕ )
 open import Data.Fin                     using ( Fin )
-open import Data.Product                 using ( Σ-syntax ; proj₁ ; proj₂ ; _,_ ; ∃ ; ∃-syntax)
+open import Data.Product                 using ( _×_ ; Σ-syntax ; proj₁ ; proj₂ ; _,_ ; ∃ ; ∃-syntax)
 open import Relation.Unary       using ( Pred ; _∈_ ; _⊆_ )
 
 import Relation.Binary.PropositionalEquality as Eq
@@ -37,45 +37,15 @@ private variable ρ β 𝓧 : Level
 -- Op A I = (I → A) → A
 
 -- Operaciones de aridad finita
-FinOp : { n : ℕ} → Type α → Type α
+FinOp : { n : ℕ } → Type α → Type α
 FinOp { n = n } A = Op A (Fin n)
 
 FinOps : Type α → Type α
 FinOps A = Σ[ n ∈ ℕ ] (FinOp {n = n} A)
 
 -- Funcion proyeccion, proyecta en la coordenada dada, infiere la aridad
-π : { n : ℕ } → Fin n → FinOp A
+π : {A : Type α} → { n : ℕ } → Fin n → FinOp A
 π k = λ x → x k 
-
--- Definimos Clones 
-containsProjections : Pred (FinOps A) ρ → Type ρ
-containsProjections F = ∀ (n : ℕ) → ∀ (k : Fin n) → F ( n , π {n = n} k )
-
-containsCompositions : Pred (FinOps A) ρ → Type (α ⊔ ρ)
-containsCompositions F = (n m : ℕ)(f : FinOp {m} A )(gs : (Fin m → FinOp {n} A)) → F ( n , λ xs → f (λ i → gs i xs) )
-
-isClon : Pred (FinOps A) ρ → Type (α ⊔ ρ)
-isClon F = containsProjections F → containsCompositions F
-
-Clones : Pred (Pred (FinOps A) ρ) (α ⊔ ρ)
-Clones = λ F → isClon F 
-
-record Clon : Type (α ⊔ suc ρ) where
-  constructor mkclon
-  field
-    F  : Pred (FinOps A) ρ
-    FIsClon : F ∈ Clones
-
-
-open import Base.Algebras.Basic using ( Algebra )
-
--- Algebra : (α : Level) → Type (𝓞 ⊔ 𝓥 ⊔ suc α)
--- Algebra α =  Σ[ A ∈ Type α ]                 -- the domain
---              ∀ (f : ∣ 𝑆 ∣) → Op A (∥ 𝑆 ∥ f)  -- the basic operations
-
--- Subuniverses : (𝑨 : Algebra α) → Pred (Pred ∣ 𝑨 ∣ β) (𝓞 ⊔ 𝓥 ⊔ α ⊔ β)
--- Subuniverses 𝑨 B = (𝑓 : ∣ 𝑆 ∣)(𝑎 : ∥ 𝑆 ∥ 𝑓 → ∣ 𝑨 ∣) → Im 𝑎 ⊆ B → (𝑓 ̂ 𝑨) 𝑎 ∈ B
-
 
 -- Relaciones de aridad finita
 FinRel : { n : ℕ } → Type α → Type (suc α)
@@ -83,6 +53,132 @@ FinRel { n = n } A  = Rel A (Fin n)
 
 FinRels : Type α → Type (suc α)
 FinRels A = Σ[ n ∈ ℕ ] (FinRel {n} A)
+
+
+-- Definimos Clones 
+containsProjections : {A : Type α} → Pred (FinOps A) ρ → Type ρ
+containsProjections F = ∀ (n : ℕ) → ∀ (k : Fin n) → F ( n , π {n = n} k )
+
+containsCompositions : {A : Type α} → Pred (FinOps A) ρ → Type (α ⊔ ρ)
+containsCompositions {A = A} F = (n m : ℕ)(f : FinOp {m} A )(gs : (Fin m → FinOp {n} A))
+                                   → F ( m , f )
+                                   → (∀ (i : Fin m) → F ( n , gs i ))
+                                   → F ( n , λ (xs : (Fin n → A)) → f (λ i → gs i xs) )
+
+--  λ (i : Fin m) → F ( n , gs i )
+
+
+isClon : {A : Type α} → Pred (FinOps A) ρ → Type (α ⊔ ρ)
+isClon F = containsProjections F × containsCompositions F
+
+-- Clones : {A : Type α} → Pred (Pred (FinOps A) ρ) (α ⊔ ρ)
+-- Clones = λ F → isClon F 
+
+record Clon : Type (α ⊔ suc ρ) where
+  constructor mkclon
+  field
+    F  : Pred (FinOps A) ρ
+    FIsClon : isClon F
+
+
+-- data Sg (𝑨 : Algebra α)(X : Pred ∣ 𝑨 ∣ β) : Pred ∣ 𝑨 ∣ (𝓞 ⊔ 𝓥 ⊔ α ⊔ β)
+--   where
+--      var : ∀ {v} → v ∈ X → v ∈ Sg 𝑨 X
+--      app : ∀ f a → Im a ⊆ Sg 𝑨 X → (f ̂ 𝑨) a ∈ Sg 𝑨 X
+
+-- clon generado
+data [_] (F : Pred (FinOps A) ρ) : Pred (FinOps A) (α ⊔ ρ)
+  where
+    ops : ∀ {f} → f ∈ F → f ∈ [ F ]
+    projections : containsProjections [ F ]
+    compositions : containsCompositions [ F ]
+
+
+open import Base.Structures.Basic using ( signature ; structure )
+open signature ; open structure
+
+-- record signature (𝓞 𝓥 : Level) : Type (suc (𝓞 ⊔ 𝓥)) where
+--   field
+--     symbol : Type 𝓞
+--     arity : symbol → Type 𝓥
+
+SubType : {U : Type β} → Pred U ρ → Type (β ⊔ ρ)
+SubType {U = U} P = Σ[ a ∈ U ] (P a)
+--              Σ U P
+--              ∃ P
+
+-- dado un conjunto de operaciones, el algebra dada por el conjunto con esas operaciones como tipo
+Op-sig : {A : Type α} → Pred (FinOps A) ρ → signature (α ⊔ ρ) Level.zero
+Op-sig F = record {symbol = SubType F ; arity = λ f → Fin (proj₁ (proj₁ f))}
+
+Rel-sig : {A : Type α} → Pred (FinRels A) ρ → signature (suc α ⊔ ρ) Level.zero
+Rel-sig R = record {symbol = SubType R ; arity = λ r → Fin (proj₁ (proj₁ r))}
+
+
+-- record structure  (𝐹 : signature 𝓞₀ 𝓥₀)
+--                   (𝑅 : signature 𝓞₁ 𝓥₁)
+--                   {α ρ : Level} : Type (𝓞₀ ⊔ 𝓥₀ ⊔ 𝓞₁ ⊔ 𝓥₁ ⊔ (suc (α ⊔ ρ)))
+--  where
+--  field
+--   carrier : Type α
+--   op   : ∀(f : symbol 𝐹) → Op  carrier (arity 𝐹 f)      -- interpret. of operations
+--   rel  : ∀(r : symbol 𝑅) → Rel carrier (arity 𝑅 r) {ρ}  -- interpret. of relations
+
+
+⟨_,_,_⟩ : (A : Type α) → (F : Pred (FinOps A) ρ) → (R : Pred (FinRels A) ρ)
+             → structure (Op-sig {A = A} F) (Rel-sig {A = A} R) {α} {α}
+⟨ A , F , R ⟩ = record {carrier = A ; op = λ f → proj₂ (proj₁ f) ; rel = λ r → proj₂ (proj₁ r) }
+
+-- term-operations
+open import Base.Terms.Basic using ( Term ; 𝑻 ) 
+open Term
+open import Base.Structures.Terms using ( _⟦_⟧ )
+variable
+ 𝓞₀ 𝓥₀ 𝓞₁ 𝓥₁ χ : Level
+ 𝐹 : signature 𝓞₀ 𝓥₀
+ 𝑅 : signature 𝓞₁ 𝓥₁
+
+ 
+TermOps : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → Pred (FinOps ( carrier 𝑨 )) _
+TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
+
+
+-- TermFromTermOp : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → ( ( n , f ) : FinOps ( carrier 𝑨 ) ) → TermOps 𝑨 ( n , f )
+-- TermFromTermOp 𝑨 ( n , f ) = ( _ , _ ) 
+
+-- fFromTerm : { n : ℕ } → Term (Fin n) → Type α
+-- fFromTerm (ℊ x) = _
+-- fFromTerm (node f t) = f
+
+-- fFromTermOp : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} → ( ( n , f ) : FinOps ( carrier 𝑨 ) ) → {tp : TermOps 𝑨 ( n , f )}  → Term ( Fin n) 
+-- fFromTermOp ( n , f ) { tp = ( t , p ) } = t 
+
+_∘t_ : { I J : Type β } → Term I → ( I → Term J ) → Term J
+(ℊ x) ∘t s = s x
+(node f t) ∘t s = node f (λ i → (t i) ∘t s )
+
+-- TermOpsIsClon' :  (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
+-- TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) , λ n m → λ f → λ gs → λ ( t , pf ) → λ tgs → ( t ∘t (λ i → proj₁ (tgs i)) , λ as → {!!} ))
+
+
+
+-- ( node {!!} {!!} , {!!} ) ) --{!λ ti → ?!} )
+
+-- TermOpsIsClon : {F : Pred (FinOps A) ρ} → {R : Pred (FinRels A) ρ} → isClon (TermOps ⟨ A , F , R ⟩) 
+-- TermOpsIsClon {F = F} {R = R} = ( (λ n → λ k → ( ℊ k , λ as → refl ) ) , λ n m → λ f →  λ gs → ( node (( m ,  f ) , {!!} )  (λ i → node ( (n , gs i) , {!} ) {!!} )  , λ as → {!!} ) )
+
+
+data ⊥ { ρ : Level } : Type ρ  where
+
+R∅ : {A : Type α } → Pred (FinRels A) ρ
+R∅ r = ⊥ 
+
+Clo[_,_] : (A : Type α) → (F : Pred (FinOps A) ρ) →  Pred (FinOps A) _
+Clo[ A , F ] = TermOps ⟨ A , F , R∅ {A = A} ⟩
+
+-- Lema:  [F] = clon(A,F)
+-- [F]≡
+
 
 -- Se fija que k vectores de largo n, coordeanada a coordenada, pertenezcan a la relación de aridad k
 evalFinRel : { k : ℕ } → FinRel { n = k} A  → ( n : ℕ) → (Fin k → Fin n → A) → Type α
@@ -92,8 +188,12 @@ evalFinRel r n t = ∀ (j : Fin n) → r λ i → t i j
 _◃_ : { n k : ℕ } → FinOp {n = n} A → FinRel {n = k} A → Type α
 _◃_ { n = n} f r = ∀ t → evalFinRel r n t → r λ i → f (t i)
 
+
 -- Lema 3 a) sii b)
 open import Base.Subalgebras.Subuniverses using ( Subuniverses )
+
+-- Subuniverses : (𝑨 : Algebra α) → Pred (Pred ∣ 𝑨 ∣ β) (𝓞 ⊔ 𝓥 ⊔ α ⊔ β)
+-- Subuniverses 𝑨 B = (𝑓 : ∣ 𝑆 ∣)(𝑎 : ∥ 𝑆 ∥ 𝑓 → ∣ 𝑨 ∣) → Im 𝑎 ⊆ B → (𝑓 ̂ 𝑨) 𝑎 ∈ B
 
 -- preserv-iff-r-subuniv : ∀ {n k : ℕ} (f : FinOp { n} A) (r : FinRel {k} A)
 --      → (f ◃ r)
