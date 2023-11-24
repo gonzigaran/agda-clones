@@ -157,10 +157,11 @@ _∘t_ : { I J : Type β } → Term I → ( I → Term J ) → Term J
 (ℊ x) ∘t s = s x
 (node f t) ∘t s = node f (λ i → (t i) ∘t s )
 
--- TermOpsIsClon' :  (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
--- TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) , λ n m → λ f → λ gs → λ ( t , pf ) → λ tgs → ( t ∘t (λ i → proj₁ (tgs i)) , λ as → {!!} ))
-
-
+TermOpsIsClon' :  (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
+TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
+                     λ n m → λ f → λ gs → λ ( t , pf ) → λ tgs → ( t ∘t (λ i → proj₁ (tgs i)) , λ as → ? ))
+-- TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
+--                      λ n m → λ f → λ gs → λ ( t , pf ) → λ gts → {!(t ∘t (λ i → proj₁ (gts i)) , ? )!}  )-- {!!} ) -- ( {!!} , λ as → {!!}))
 
 -- ( node {!!} {!!} , {!!} ) ) --{!λ ti → ?!} )
 
