@@ -130,6 +130,7 @@ Rel-sig R = record {symbol = SubType R ; arity = λ r → Fin (proj₁ (proj₁ 
 ⟨ A , F , R ⟩ = record {carrier = A ; op = λ f → proj₂ (proj₁ f) ; rel = λ r → proj₂ (proj₁ r) }
 
 -- term-operations
+open import Overture.Signatures
 open import Base.Terms.Basic using ( Term ; 𝑻 ) 
 open Term
 open import Base.Structures.Terms using ( _⟦_⟧ )
@@ -137,7 +138,7 @@ variable
  𝓞₀ 𝓥₀ 𝓞₁ 𝓥₁ χ : Level
  𝐹 : signature 𝓞₀ 𝓥₀
  𝑅 : signature 𝓞₁ 𝓥₁
-
+ 𝑆 : Signature 𝓞 𝓥
  
 TermOps : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → Pred (FinOps ( carrier 𝑨 )) _
 TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
@@ -153,13 +154,25 @@ TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦
 -- fFromTermOp : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} → ( ( n , f ) : FinOps ( carrier 𝑨 ) ) → {tp : TermOps 𝑨 ( n , f )}  → Term ( Fin n) 
 -- fFromTermOp ( n , f ) { tp = ( t , p ) } = t 
 
-_∘t_ : { I J : Type β } → Term I → ( I → Term J ) → Term J
+_∘t_ : { I J : Type β } → Term {𝑆 = 𝑆} I → ( I → Term J ) → Term J
 (ℊ x) ∘t s = s x
 (node f t) ∘t s = node f (λ i → (t i) ∘t s )
 
-TermOpsIsClon' :  (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
-TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
-                     λ n m → λ f → λ gs → λ ( t , pf ) → λ tgs → ( t ∘t (λ i → proj₁ (tgs i)) , λ as → ? ))
+
+⟦∘t⟧≡⟦⟧∘t⟦⟧ : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} { I J : Type β }  {t : Term I} {s : I → Term J} {as : J → carrier 𝑨}
+      → (𝑨 ⟦ (t ∘t s) ⟧) as ≡ (𝑨 ⟦ t ⟧) (λ i → (𝑨 ⟦ (s i) ⟧) as) 
+⟦∘t⟧≡⟦⟧∘t⟦⟧ {t = ℊ x} = refl
+⟦∘t⟧≡⟦⟧∘t⟦⟧ {𝑨 = 𝑨} {t = node f r} {s = s} {as = as} = cong  (op 𝑨 f) {!!}
+
+
+-- begin
+--                                       op 𝑨 f (λ i → (𝑨 ⟦ t i ∘t s ⟧) as) ≡⟨ {!∘t-⟦⟧ {𝑨 = 𝑨} {t = t} {s = s} {as = as}!} ⟩
+--                                       {!!}
+
+
+TermOpsIsClon :  (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
+TermOpsIsClon 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
+                    λ n m → λ f → λ gs → λ ( t , pf ) → λ tgs → ( t ∘t (λ i → proj₁ (tgs i)) , λ as →  {!!}))
 -- TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
 --                      λ n m → λ f → λ gs → λ ( t , pf ) → λ gts → {!(t ∘t (λ i → proj₁ (gts i)) , ? )!}  )-- {!!} ) -- ( {!!} , λ as → {!!}))
 
