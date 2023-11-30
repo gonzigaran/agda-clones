@@ -144,35 +144,36 @@ TermOps : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → Pred (FinOps ( carrier 𝑨
 TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
 
 
--- TermFromTermOp : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → ( ( n , f ) : FinOps ( carrier 𝑨 ) ) → TermOps 𝑨 ( n , f )
--- TermFromTermOp 𝑨 ( n , f ) = ( _ , _ ) 
+-- _∘t_ : { I J : Type β } → Term {𝑆 = 𝑆} I → ( I → Term J ) → Term J
+-- (ℊ x) ∘t s = s x
+-- (node f t) ∘t s = node f (λ i → (t i) ∘t s )
 
--- fFromTerm : { n : ℕ } → Term (Fin n) → Type α
--- fFromTerm (ℊ x) = _
--- fFromTerm (node f t) = f
+-- ⟦∘t⟧≡⟦⟧∘t⟦⟧ : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} { I J : Type β }  {t : Term I} {s : I → Term J} {as : J → carrier 𝑨}
+--       → (𝑨 ⟦ (t ∘t s) ⟧) as ≡ (𝑨 ⟦ t ⟧) (λ i → (𝑨 ⟦ (s i) ⟧) as) 
+-- ⟦∘t⟧≡⟦⟧∘t⟦⟧ {t = ℊ x} = refl
+-- ⟦∘t⟧≡⟦⟧∘t⟦⟧ {𝑨 = 𝑨} {t = node f r} {s = s} {as = as} = cong  (op 𝑨 f) {!!}
 
--- fFromTermOp : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} → ( ( n , f ) : FinOps ( carrier 𝑨 ) ) → {tp : TermOps 𝑨 ( n , f )}  → Term ( Fin n) 
--- fFromTermOp ( n , f ) { tp = ( t , p ) } = t 
+open import Base.Terms.Operations using ( _[_]t ; Substerm )
+open import Base.Equality   using ( swelldef )
+open import Function        using ( _∘_ )
 
-_∘t_ : { I J : Type β } → Term {𝑆 = 𝑆} I → ( I → Term J ) → Term J
-(ℊ x) ∘t s = s x
-(node f t) ∘t s = node f (λ i → (t i) ∘t s )
+subst-lemma-t :  { 𝐹 : signature 𝓞₀ 𝓥₀} → swelldef 𝓥₀ α → {I J : Type χ }(r : Term I)(s : Substerm J I )
+                 (𝑨 : structure 𝐹 𝑅 {α} {ρ})(as : J → carrier 𝑨)
+              →  (𝑨 ⟦ r [ s ]t ⟧) as ≡ (𝑨 ⟦ r ⟧) (λ i → (𝑨 ⟦ s i ⟧) as)
+subst-lemma-t _ (ℊ x) s 𝑨 as = refl
+subst-lemma-t wd (node f t) s 𝑨 as = wd ((op 𝑨) f)  ( λ j → (𝑨 ⟦ (t j) [ s ]t ⟧) as )
+                                             ( λ j → (𝑨 ⟦ t j ⟧) (λ i → (𝑨 ⟦ s i ⟧) as)  )
+                                             λ j → subst-lemma-t wd (t j) s 𝑨 as
+                                             
 
-
-⟦∘t⟧≡⟦⟧∘t⟦⟧ : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} { I J : Type β }  {t : Term I} {s : I → Term J} {as : J → carrier 𝑨}
-      → (𝑨 ⟦ (t ∘t s) ⟧) as ≡ (𝑨 ⟦ t ⟧) (λ i → (𝑨 ⟦ (s i) ⟧) as) 
-⟦∘t⟧≡⟦⟧∘t⟦⟧ {t = ℊ x} = refl
-⟦∘t⟧≡⟦⟧∘t⟦⟧ {𝑨 = 𝑨} {t = node f r} {s = s} {as = as} = cong  (op 𝑨 f) {!!}
-
-
--- begin
---                                       op 𝑨 f (λ i → (𝑨 ⟦ t i ∘t s ⟧) as) ≡⟨ {!∘t-⟦⟧ {𝑨 = 𝑨} {t = t} {s = s} {as = as}!} ⟩
---                                       {!!}
-
-
-TermOpsIsClon :  (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
+TermOpsIsClon : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
 TermOpsIsClon 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
-                    λ n m → λ f → λ gs → λ ( t , pf ) → λ tgs → ( t ∘t (λ i → proj₁ (tgs i)) , λ as →  {!!}))
+                    λ n m → λ f → λ gs → λ tf → λ tgs → ( (proj₁ tf) [ (λ i → proj₁ (tgs i)) ]t , λ as → 
+                    f (λ i → gs i as)                                       ≡⟨ proj₂ tf (λ i → gs i as) ⟩
+                    (𝑨 ⟦ proj₁ tf ⟧) (λ i → gs i as)                         ≡⟨ cong ((𝑨 ⟦ proj₁ tf ⟧)) {!!} ⟩
+                    (𝑨 ⟦ proj₁ tf ⟧) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as)         ≡⟨  sym (subst-lemma-t _ (proj₁ tf) (λ i → proj₁ (tgs i)) 𝑨 as) ⟩
+                    (𝑨 ⟦ ( (proj₁ tf) [ (λ i → proj₁ (tgs i) ) ]t) ⟧ ) as    ∎  ) )
+
 -- TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
 --                      λ n m → λ f → λ gs → λ ( t , pf ) → λ gts → {!(t ∘t (λ i → proj₁ (gts i)) , ? )!}  )-- {!!} ) -- ( {!!} , λ as → {!!}))
 
