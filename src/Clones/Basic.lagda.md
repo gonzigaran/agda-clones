@@ -24,7 +24,7 @@ import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; trans; sym; cong; cong-app; subst)
 open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
 
-open import Overture.Operations          using ( Op )
+open import Overture        using ( _≈_ ; _⁻¹ ; Op )
 open import Base.Relations.Continuous    using ( Rel )
 
 private variable ρ β 𝓧 : Level
@@ -87,47 +87,31 @@ record Clon : Type (α ⊔ suc ρ) where
 --      app : ∀ f a → Im a ⊆ Sg 𝑨 X → (f ̂ 𝑨) a ∈ Sg 𝑨 X
 
 -- clon generado
-data [_] (F : Pred (FinOps A) ρ) : Pred (FinOps A) (α ⊔ ρ)
+data [_] {A : Type α}(F : Pred (FinOps A) ρ) : Pred (FinOps A) (suc Level.zero ⊔ α ⊔ ρ)
   where
     ops : ∀ {f} → f ∈ F → f ∈ [ F ]
     projections : containsProjections [ F ]
     compositions : containsCompositions [ F ]
 
+GeneratedClonIsClon : {A : Type α} {F : Pred (FinOps A) ρ} → isClon {A = A} [ F ]
+GeneratedClonIsClon {A = A} {F = F} = {![ F ].projections!} , {!!}
 
 open import Base.Structures.Basic using ( signature ; structure )
 open signature ; open structure
 
--- record signature (𝓞 𝓥 : Level) : Type (suc (𝓞 ⊔ 𝓥)) where
---   field
---     symbol : Type 𝓞
---     arity : symbol → Type 𝓥
-
 SubType : {U : Type β} → Pred U ρ → Type (β ⊔ ρ)
 SubType {U = U} P = Σ[ a ∈ U ] (P a)
---              Σ U P
---              ∃ P
 
--- dado un conjunto de operaciones, el algebra dada por el conjunto con esas operaciones como tipo
 Op-sig : {A : Type α} → Pred (FinOps A) ρ → signature (α ⊔ ρ) Level.zero
 Op-sig F = record {symbol = SubType F ; arity = λ f → Fin (proj₁ (proj₁ f))}
 
 Rel-sig : {A : Type α} → Pred (FinRels A) ρ → signature (suc α ⊔ ρ) Level.zero
 Rel-sig R = record {symbol = SubType R ; arity = λ r → Fin (proj₁ (proj₁ r))}
 
-
--- record structure  (𝐹 : signature 𝓞₀ 𝓥₀)
---                   (𝑅 : signature 𝓞₁ 𝓥₁)
---                   {α ρ : Level} : Type (𝓞₀ ⊔ 𝓥₀ ⊔ 𝓞₁ ⊔ 𝓥₁ ⊔ (suc (α ⊔ ρ)))
---  where
---  field
---   carrier : Type α
---   op   : ∀(f : symbol 𝐹) → Op  carrier (arity 𝐹 f)      -- interpret. of operations
---   rel  : ∀(r : symbol 𝑅) → Rel carrier (arity 𝑅 r) {ρ}  -- interpret. of relations
-
-
 ⟨_,_,_⟩ : (A : Type α) → (F : Pred (FinOps A) ρ) → (R : Pred (FinRels A) ρ)
              → structure (Op-sig {A = A} F) (Rel-sig {A = A} R) {α} {α}
 ⟨ A , F , R ⟩ = record {carrier = A ; op = λ f → proj₂ (proj₁ f) ; rel = λ r → proj₂ (proj₁ r) }
+
 
 -- term-operations
 open import Overture.Signatures
@@ -143,16 +127,6 @@ variable
 TermOps : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → Pred (FinOps ( carrier 𝑨 )) _
 TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
 
-
--- _∘t_ : { I J : Type β } → Term {𝑆 = 𝑆} I → ( I → Term J ) → Term J
--- (ℊ x) ∘t s = s x
--- (node f t) ∘t s = node f (λ i → (t i) ∘t s )
-
--- ⟦∘t⟧≡⟦⟧∘t⟦⟧ : {𝑨 : structure 𝐹 𝑅 {α} {ρ}} { I J : Type β }  {t : Term I} {s : I → Term J} {as : J → carrier 𝑨}
---       → (𝑨 ⟦ (t ∘t s) ⟧) as ≡ (𝑨 ⟦ t ⟧) (λ i → (𝑨 ⟦ (s i) ⟧) as) 
--- ⟦∘t⟧≡⟦⟧∘t⟦⟧ {t = ℊ x} = refl
--- ⟦∘t⟧≡⟦⟧∘t⟦⟧ {𝑨 = 𝑨} {t = node f r} {s = s} {as = as} = cong  (op 𝑨 f) {!!}
-
 open import Base.Terms.Operations using ( _[_]t ; Substerm )
 open import Base.Equality   using ( swelldef )
 open import Function        using ( _∘_ )
@@ -166,21 +140,17 @@ subst-lemma-t wd (node f t) s 𝑨 as = wd ((op 𝑨) f)  ( λ j → (𝑨 ⟦ (
                                              λ j → subst-lemma-t wd (t j) s 𝑨 as
                                              
 
-TermOpsIsClon : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
-TermOpsIsClon 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
+TermOpsIsClon : { 𝐹 : signature 𝓞₀ 𝓥₀} → (∀ ℓ ℓ' → swelldef ℓ ℓ' ) → (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
+TermOpsIsClon wd 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
                     λ n m → λ f → λ gs → λ tf → λ tgs → ( (proj₁ tf) [ (λ i → proj₁ (tgs i)) ]t , λ as → 
-                    f (λ i → gs i as)                                       ≡⟨ proj₂ tf (λ i → gs i as) ⟩
-                    (𝑨 ⟦ proj₁ tf ⟧) (λ i → gs i as)                         ≡⟨ cong ((𝑨 ⟦ proj₁ tf ⟧)) {!!} ⟩
-                    (𝑨 ⟦ proj₁ tf ⟧) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as)         ≡⟨  sym (subst-lemma-t _ (proj₁ tf) (λ i → proj₁ (tgs i)) 𝑨 as) ⟩
-                    (𝑨 ⟦ ( (proj₁ tf) [ (λ i → proj₁ (tgs i) ) ]t) ⟧ ) as    ∎  ) )
-
--- TermOpsIsClon' 𝑨 = ( (λ n → λ k → ( ℊ k , λ as →  refl )) ,
---                      λ n m → λ f → λ gs → λ ( t , pf ) → λ gts → {!(t ∘t (λ i → proj₁ (gts i)) , ? )!}  )-- {!!} ) -- ( {!!} , λ as → {!!}))
-
--- ( node {!!} {!!} , {!!} ) ) --{!λ ti → ?!} )
-
--- TermOpsIsClon : {F : Pred (FinOps A) ρ} → {R : Pred (FinRels A) ρ} → isClon (TermOps ⟨ A , F , R ⟩) 
--- TermOpsIsClon {F = F} {R = R} = ( (λ n → λ k → ( ℊ k , λ as → refl ) ) , λ n m → λ f →  λ gs → ( node (( m ,  f ) , {!!} )  (λ i → node ( (n , gs i) , {!} ) {!!} )  , λ as → {!!} ) )
+                      f (λ i → gs i as)
+                    ≡⟨ proj₂ tf (λ i → gs i as) ⟩
+                      (𝑨 ⟦ proj₁ tf ⟧) (λ i → gs i as)
+                    ≡⟨ wd _ _ (𝑨 ⟦ proj₁ tf ⟧) (λ z → gs z as) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as) (λ i → proj₂ (tgs i ) as) ⟩
+                      (𝑨 ⟦ proj₁ tf ⟧) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as)
+                    ≡⟨ sym (subst-lemma-t (wd _ _) (proj₁ tf) (λ i → proj₁ (tgs i)) 𝑨 as) ⟩
+                      (𝑨 ⟦ ( (proj₁ tf) [ (λ i → proj₁ (tgs i) ) ]t) ⟧ ) as
+                    ∎  ) )
 
 
 data ⊥ { ρ : Level } : Type ρ  where
@@ -188,35 +158,53 @@ data ⊥ { ρ : Level } : Type ρ  where
 R∅ : {A : Type α } → Pred (FinRels A) ρ
 R∅ r = ⊥ 
 
-Clo[_,_] : (A : Type α) → (F : Pred (FinOps A) ρ) →  Pred (FinOps A) _
+Clo[_,_] : (A : Type α) → (F : Pred (FinOps A) ρ) →  Pred (FinOps A) (suc Level.zero ⊔ α ⊔ ρ)
 Clo[ A , F ] = TermOps ⟨ A , F , R∅ {A = A} ⟩
 
 -- Lema:  [F] = clon(A,F)
--- [F]≡
+[F]≡Clo[A,F] : (A : Type α) (F : Pred (FinOps A) ρ)
+             → [ F ] ≈ Clo[ A , F ]
+[F]≡Clo[A,F] A F = λ ( n , f ) → {!!}
 
 
 -- Se fija que k vectores de largo n, coordeanada a coordenada, pertenezcan a la relación de aridad k
-evalFinRel : { k : ℕ } → FinRel { n = k} A  → ( n : ℕ) → (Fin k → Fin n → A) → Type α
+evalFinRel : {A : Type α } → { k : ℕ } → FinRel { n = k} A  → ( n : ℕ) → (Fin k → Fin n → A) → Type α
 evalFinRel r n t = ∀ (j : Fin n) → r λ i → t i j 
 
 -- f preserva la relacion r
-_◃_ : { n k : ℕ } → FinOp {n = n} A → FinRel {n = k} A → Type α
+_◃_ : {A : Type α} → { n k : ℕ } → FinOp {n = n} A → FinRel {n = k} A → Type α
 _◃_ { n = n} f r = ∀ t → evalFinRel r n t → r λ i → f (t i)
 
 
 -- Lema 3 a) sii b)
-open import Base.Subalgebras.Subuniverses using ( Subuniverses )
+open import Base.Structures.Substructures using ( Subuniverses )
+open import Base.Structures.Products using ( ⨅ )
 
--- Subuniverses : (𝑨 : Algebra α) → Pred (Pred ∣ 𝑨 ∣ β) (𝓞 ⊔ 𝓥 ⊔ α ⊔ β)
--- Subuniverses 𝑨 B = (𝑓 : ∣ 𝑆 ∣)(𝑎 : ∥ 𝑆 ∥ 𝑓 → ∣ 𝑨 ∣) → Im 𝑎 ⊆ B → (𝑓 ̂ 𝑨) 𝑎 ∈ B
+preserv-then-r-subuniv : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n} A )  (r : FinRel {k} A )
+                       → (f ◃ r)
+                       ---------
+                       → Subuniverses {𝑨 = ⨅ {ℑ = Fin k } (λ i → ⟨  A , (λ g → g ≡ ( n , f )) , R∅ ⟩)} {X = Type ρ} r
+preserv-then-r-subuniv f r pfr = {!!}
 
--- preserv-iff-r-subuniv : ∀ {n k : ℕ} (f : FinOp { n} A) (r : FinRel {k} A)
---      → (f ◃ r)
---   → (f ◃ r) ≡ (r ∈ Subuniverses (A , ))
--- preserv-iff-r-subuniv f r = {!!}
+r-subuniv-then-preserv : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n} A )  (r : FinRel {k} A )
+                       → Subuniverses {𝑨 = ⨅ {ℑ = Fin k } (λ i → ⟨  A , (λ g → g ≡ ( n , f )) , R∅ ⟩)} {X = Type ρ} r
+                       ---------
+                       → (f ◃ r)
+r-subuniv-then-preserv f r psubr = {!!}
 
 
+-- Lema 3 a) sii c)
+preserv-then-f-homo : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n} A )  (r : FinRel {k} A )
+                    → (f ◃ r)
+                    ----------
+                    → {!!}
+preserv-then-f-homo f r pfr = {!!}
 
+f-homo-then-preserv : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n} A )  (r : FinRel {k} A )
+                    → {!!}
+                    ---------
+                    → (f ◃ r)
+f-homo-then-preserv f r pfhomo = {!!}
 
 
 -- invariantes de un conjunto de operaciones F
@@ -274,5 +262,3 @@ pol R = λ f → ∀ r → r ∈ R →  (proj₂ f) ◃ (proj₂ r)
 -- toOp : ∀ n → (A ^ n) → FinOp {n = n} A
 -- toOp zero f g = f
 -- toOp (suc n) f g = toOp n (f (g zero)) (λ k -> g (suc k))
-
-
