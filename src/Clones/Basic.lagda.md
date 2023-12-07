@@ -24,7 +24,7 @@ private variable α ρ : Level
 
 ## Operaciones y Relaciones
 
-Para un conjunto $A$ definimos el conjunto de operaciones $n$-arias para un $ n ∈ ℕ $ fijo, y luego el conjunto de operaciones de aridad finita.
+Para un conjunto $A$ definimos el conjunto de operaciones $n$-arias para un $n ∈ ℕ$ fijo, y luego el conjunto de operaciones de aridad finita.
 
 ```agda
 
@@ -90,7 +90,7 @@ record Clon {A : Type α} : Type (α ⊔ suc ρ) where
 
 ### Clon generado
 
-A partir de un conjunto $F$ de operaciones en $A$ podemos hablar del clon generado por $F$ como el menor clon que contiene a $F$. Lo denotamos con [F].
+A partir de un conjunto $F$ de operaciones en $A$ podemos hablar del clon generado por $F$ como el menor clon que contiene a $F$. Lo denotamos con [$F$].
 
 ```agda
 
