@@ -28,7 +28,7 @@ private variable α ρ β : Level
 
 ```
 
-Para un álgebra $𝑨$ dada, podemos hablar del Clon de $ 𝑨 $ cómo todas las operaciones que se pueden generar a partir de componer las funciones del álgebra y las proyecciones. Este clon coincide con las *term-operations*, que son todas las operaciones definidas a partir de un término.  
+Para un álgebra $𝑨$ dada, podemos hablar del Clon de $𝑨$ cómo todas las operaciones que se pueden generar a partir de componer las funciones del álgebra y las proyecciones. Este clon coincide con las *term-operations*, que son todas las operaciones definidas a partir de un término.  
 
 
 ```agda
@@ -123,7 +123,7 @@ Clo[ A , F ] = TermOps ⟨ A , F , R∅ {A = A} ⟩
 
 ```
 
-El clon de las *term-operations* dado por clo[ $a$ , $f$ ] coincide con el clon generado por $F$.
+El clon de las *term-operations* dado por Clo[ $A$ , $F$ ] coincide con el clon generado por $F$.
 
 ```agda
 
