@@ -10,6 +10,8 @@ author: "Gonzalo Zigarán"
 
 ```agda
 
+{-# OPTIONS --allow-unsolved-metas #-}
+
 module Clones.TermOps where
 
 open import Agda.Primitive               using () renaming ( Set to Type )
