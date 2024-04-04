@@ -13,3 +13,4 @@ _build/
 *.md#
 *.md~
 *Prueba*
+.agda-html/
