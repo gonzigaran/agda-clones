@@ -61,15 +61,19 @@ open import Base.Equality   using ( swelldef )
 
 subst-lemma-t :  { 𝐹 : signature 𝓞₀ 𝓥₀} → swelldef 𝓥₀ α → {I J : Type χ }(r : Term I)(s : Substerm J I )
                  (𝑨 : structure 𝐹 𝑅 {α} {ρ})(as : J → carrier 𝑨)
+                 ----------------------------------------------------
               →  (𝑨 ⟦ r [ s ]t ⟧) as ≡ (𝑨 ⟦ r ⟧) (λ i → (𝑨 ⟦ s i ⟧) as)
-subst-lemma-t _ (Term.ℊ x) s 𝑨 as = refl
+subst-lemma-t _  (Term.ℊ x)      s 𝑨 as = refl
 subst-lemma-t wd (Term.node f t) s 𝑨 as = wd ((op 𝑨) f)  ( λ j → (𝑨 ⟦ (t j) [ s ]t ⟧) as )
                                              ( λ j → (𝑨 ⟦ t j ⟧) (λ i → (𝑨 ⟦ s i ⟧) as)  )
                                              λ j → subst-lemma-t wd (t j) s 𝑨 as
 
 open import Clones.Basic using ( isClon )
 
-TermOpsIsClon : { 𝐹 : signature 𝓞₀ 𝓥₀} → (∀ ℓ ℓ' → swelldef ℓ ℓ' ) → (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → isClon {A = carrier 𝑨} (TermOps 𝑨)
+TermOpsIsClon : { 𝐹 : signature 𝓞₀ 𝓥₀} → (∀ ℓ ℓ' → swelldef ℓ ℓ' )
+                → (𝑨 : structure 𝐹 𝑅 {α} {ρ})
+                ------------------------------------
+                → isClon {A = carrier 𝑨} (TermOps 𝑨)
 TermOpsIsClon wd 𝑨 = ( (λ n → λ k → ( Term.ℊ k , λ as →  refl )) ,
                     λ n m → λ f → λ gs → λ tf → λ tgs → ( (proj₁ tf) [ (λ i → proj₁ (tgs i)) ]t , λ as → 
                       f (λ i → gs i as)
@@ -101,7 +105,8 @@ Rels-sig R = record {symbol = SubType R ; arity = λ r → Fin (proj₁ (proj₁
 
 -- estructura inducida por F y R
 ⟨_,_,_⟩ : (A : Type α) → (F : Pred (FinOps A) ρ) → (R : Pred (FinRels A) ρ)
-             → structure (Ops-sig {A = A} F) (Rels-sig {A = A} R) {α} {α}
+         ------------------------------------------------------------ 
+         → structure (Ops-sig {A = A} F) (Rels-sig {A = A} R) {α} {α}
 ⟨ A , F , R ⟩ = record {carrier = A ; op = λ f → proj₂ (proj₁ f) ; rel = λ r → proj₂ (proj₁ r) }
 
 ```
@@ -135,7 +140,8 @@ open import Clones.Basic using ( [_] )
 -- TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
 
 [F]≡Clo[A,F] : (A : Type α) (F : Pred (FinOps A) ρ)
-             → Clo[ A , F ] ≈ [ F ]
+               ----------------------
+               → Clo[ A , F ] ≈ [ F ]
 [F]≡Clo[A,F] A F = λ ( n , f ) →  {!!}
 
 ```

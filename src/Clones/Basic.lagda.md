@@ -24,7 +24,7 @@ private variable α ρ : Level
 
 ## Operaciones y Relaciones
 
-Para un conjunto $A$ definimos el conjunto de operaciones $n$-arias para un $n ∈ ℕ$ fijo, y luego el conjunto de operaciones de aridad finita.
+Para un conjunto $A$ y un $n ∈ ℕ$, definimos el conjunto de operaciones $n$-arias, y luego el conjunto de operaciones de aridad finita.
 
 ```agda
 
@@ -38,7 +38,7 @@ FinOps A = Σ[ n ∈ ℕ ] (FinOp {n = n} A)
 
 ```
 
-De la misma manera, el conjunto de relaciones con elementos de $A$ de aridad para un $n$ fijo, y de relaciones de aridad finita
+De la misma manera, el conjunto de relaciones con elementos de $A$ de aridad $n$, con $n ∈ ℕ$ fijo, y de relaciones de aridad finita
 
 ```agda
 
@@ -95,7 +95,7 @@ A partir de un conjunto $F$ de operaciones en $A$ podemos hablar del clon genera
 ```agda
 
 -- clon generado
-data [_] {A : Type α}(F : Pred (FinOps A) ρ) : Pred (FinOps A) (suc Level.zero ⊔ α ⊔ ρ)
+data [_] {A : Type α} (F : Pred (FinOps A) ρ) : Pred (FinOps A) (suc Level.zero ⊔ α ⊔ ρ)
   where
     ops : ∀ {f} → f ∈ F → f ∈ [ F ]
     projections : containsProjections [ F ]
