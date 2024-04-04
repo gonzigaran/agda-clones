@@ -1,22 +1,21 @@
-<!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>Overture.Preface</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Background">---
+---
 layout: default
-title : &quot;Overture.Preface module (The Agda Universal Algebra Library)&quot;
-date : &quot;2021-01-14&quot;
-author: &quot;the agda-algebras development team&quot;
+title : "Overture.Preface module (The Agda Universal Algebra Library)"
+date : "2021-01-14"
+author: "the agda-algebras development team"
 ---
 
-### &lt;a id=&quot;preface&quot;&gt;Preface&lt;/a&gt;
+### <a id="preface">Preface</a>
 
 This is the [Overture.Preface][] module of the [Agda Universal Algebra Library][].
 
-</a><a id="279" class="Markup">\begin{code}[hide]</a>
+<pre class="Agda">
 
 <a id="299" class="Symbol">{-#</a> <a id="303" class="Keyword">OPTIONS</a> <a id="311" class="Pragma">--without-K</a> <a id="323" class="Pragma">--exact-split</a> <a id="337" class="Pragma">--safe</a> <a id="344" class="Symbol">#-}</a>
 
 <a id="349" class="Keyword">module</a> <a id="356" href="Overture.Preface.html" class="Module">Overture.Preface</a> <a id="373" class="Keyword">where</a>
 
-<a id="380" class="Markup">\end{code}</a><a id="390" class="Background">
+</pre>
 
 To support formalization in type theory of research level mathematics in universal
 algebra and related fields, we present the [Agda Universal Algebra
@@ -27,7 +26,7 @@ First (Noether) Isomorphism Theorem and the [Birkhoff HSP
 Theorem](https://ualib.org/Setoid.Varieties.HSP.html#proof-of-the-hsp-theorem)
 asserting that every variety is an equational class.
 
-#### &lt;a id=&quot;vision-and-goals&quot;&gt;Vision and goals&lt;/a&gt;
+#### <a id="vision-and-goals">Vision and goals</a>
 
 The idea for the [agda-algebras][] project originated with the observation that,
 on the one hand a number of basic and important constructs in universal algebra
@@ -39,7 +38,7 @@ constructive (*computable*) proofs of their properties. These observations sugge
 that there is much to gain from implementing universal algebra in a language that
 facilitates working with dependent and inductive types.
 
-##### &lt;a id=&quot;primary-goals&quot;&gt;Primary goals&lt;/a&gt;
+##### <a id="primary-goals">Primary goals</a>
 
 The first goal of [agda-algebras][] is to demonstrate that it is possible to
 express the foundations of universal algebra in type theory and to formalize (and
@@ -59,7 +58,7 @@ presentation of its foundations.  Our new presentation expresses the foundations
 of universal algebra in the language of type theory, and uses the Agda proof
 assistant to codify and formally verify everything.
 
-##### &lt;a id=&quot;secondary-goals&quot;&gt;Secondary goals&lt;/a&gt;
+##### <a id="secondary-goals">Secondary goals</a>
 
 We wish to emphasize that our ultimate objective is not merely to translate
 existing results into a more modern and formal language.  Indeed, one important
@@ -80,7 +79,7 @@ with a specialized library for universal algebra is an extremely useful research
 tool. Thus, a secondary goal is to demonstrate (to ourselves and colleagues) the
 utility of such technologies for discovering new mathematics.
 
-#### &lt;a id=&quot;logical-foundations&quot;&gt;Logical foundations&lt;/a&gt;
+#### <a id="logical-foundations">Logical foundations</a>
 
 The [Agda Universal Algebra Library][] is based on a minimal version of
 [Martin-Löf dependent type theory][] (MLTT) as implemented in Agda. More details
@@ -88,7 +87,7 @@ on this type theory can be read at [ncatlab entry on Martin-Löf dependent type
 theory](https://ncatlab.org/nlab/show/Martin-L%C3%B6f+dependent+type+theory).
 
 
-#### &lt;a id=&quot;intended-audience&quot;&gt;Intended audience&lt;/a&gt;
+#### <a id="intended-audience">Intended audience</a>
 
 The comments and source code in the library should provide enough detail so that
 people familiar with functional programming and proof assistants can learn enough
@@ -106,15 +105,15 @@ referring to one or more of the resources mentioned in the references section
 below to fill in gaps as needed.
 
 
-#### &lt;a id=&quot;attributions&quot;&gt;Attributions&lt;/a&gt;
+#### <a id="attributions">Attributions</a>
 
-##### &lt;a id=&quot;the-agda-algebras-development-team&quot;&gt;The agda-algebras development team&lt;/a&gt;
+##### <a id="the-agda-algebras-development-team">The agda-algebras development team</a>
 
 The [agda-algebras][] library is developed and maintained by the *Agda Algebras
 Development Team* led by [William DeMeo][] with major contributions by senior
 advisor [Jacques Carette][] (McMaster University).
 
-##### &lt;a id=&quot;Acknowledgements&quot;&gt;Acknowledgements&lt;/a&gt;
+##### <a id="Acknowledgements">Acknowledgements</a>
 
 We thank [Andreas Abel][], [Andrej Bauer][], [Clifford Bergman][], [Venanzio
 Capretta][], [Martín Escardó][], [Ralph Freese][], [Hyeyoung Shin][], and [Siva
@@ -126,7 +125,7 @@ are well known. Regarding the source code in the [agda-algebras][]
 library, this is mainly due to the contributors listed above.
 
 
-#### &lt;a id=&quot;references&quot;&gt;References&lt;/a&gt;
+#### <a id="references">References</a>
 
 The following Agda documentation and tutorials helped inform and improve the
 [agda-algebras][] library, especially the first one in the list.
@@ -137,12 +136,12 @@ The following Agda documentation and tutorials helped inform and improve the
 * Gunther, Gadea, Pagano, [Formalization of Universal Algebra in Agda][]
 * Norell and Chapman, [Dependently Typed Programming in Agda][]
 
-Finally, the official [Agda Wiki][], [Agda User&#39;s Manual][], [Agda Language
+Finally, the official [Agda Wiki][], [Agda User's Manual][], [Agda Language
 Reference][], and the (open source) [Agda Standard Library][] source code are also
 quite useful.
 
 
-#### &lt;a id=&quot;citing-the-agda-algebras-library&quot;&gt;Citing the agda-algebras library&lt;/a&gt;
+#### <a id="citing-the-agda-algebras-library">Citing the agda-algebras library</a>
 
 If you find the [agda-algebras][] library useful, please cite it using the
 following BibTeX entry:
@@ -163,17 +162,17 @@ following BibTeX entry:
 }
 ```
 
-#### &lt;a id=&quot;citing-the-formalization-of-birkhoffs-theorem&quot;&gt;Citing the formalization of Birkhoff&#39;s Theorem &lt;/a&gt;
+#### <a id="citing-the-formalization-of-birkhoffs-theorem">Citing the formalization of Birkhoff's Theorem </a>
 
-To cite the [formalization of Birkhoff&#39;s HSP
+To cite the [formalization of Birkhoff's HSP
 Theorem](https://ualib.org/Setoid.Varieties.HSP.html#proof-of-the-hsp-theorem),
 please use the following BibTeX entry:
 
 ```bibtex
 @article{DeMeo:2021,
  author        = {De{M}eo, William and Carette, Jacques},
- title         = {A {M}achine-checked {P}roof of {B}irkhoff&#39;s {V}ariety {T}heorem
-                  in {M}artin-{L}\&quot;of {T}ype {T}heory},
+ title         = {A {M}achine-checked {P}roof of {B}irkhoff's {V}ariety {T}heorem
+                  in {M}artin-{L}\"of {T}ype {T}heory},
  journal       = {CoRR},
  volume        = {abs/2101.10166},
  year          = {2021},
@@ -188,7 +187,7 @@ please use the following BibTeX entry:
 ```
 
 
-#### &lt;a id=&quot;contributions-welcomed&quot;&gt;Contributions welcomed&lt;/a&gt;
+#### <a id="contributions-welcomed">Contributions welcomed</a>
 
 Readers and users are encouraged to suggest improvements to the Agda
 [agda-algebras][] library and/or its documentation by submitting a
@@ -198,8 +197,7 @@ Readers and users are encouraged to suggest improvements to the Agda
 
 ------------------------------------------------
 
-&lt;span style=&quot;float:left;&quot;&gt;[↑ Overture](Overture.html)&lt;/span&gt;
-&lt;span style=&quot;float:right;&quot;&gt;[Overture.Basic →](Overture.Basic.html)&lt;/span&gt;
+<span style="float:left;">[↑ Overture](Overture.html)</span>
+<span style="float:right;">[Overture.Basic →](Overture.Basic.html)</span>
 
 {% include UALib.Links.md %}
-</a></pre></body></html>

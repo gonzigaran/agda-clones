@@ -1,16 +1,15 @@
-<!DOCTYPE HTML>
-<html><head><meta charset="utf-8"><title>Base.Relations.Continuous</title><link rel="stylesheet" href="Agda.css"></head><body><pre class="Agda"><a id="1" class="Background">---
+---
 layout: default
-title : &quot;Base.Relations.Continuous module (The Agda Universal Algebra Library)&quot;
-date : &quot;2021-02-28&quot;
-author: &quot;[agda-algebras development team][]&quot;
+title : "Base.Relations.Continuous module (The Agda Universal Algebra Library)"
+date : "2021-02-28"
+author: "[agda-algebras development team][]"
 ---
 
-### &lt;a id=&quot;continuous-relations&quot;&gt;Continuous Relations&lt;/a&gt;
+### <a id="continuous-relations">Continuous Relations</a>
 
 This is the [Base.Relations.Continuous][] module of the [Agda Universal Algebra Library][].
 
-</a><a id="323" class="Markup">\begin{code}</a>
+<pre class="Agda">
 
 <a id="337" class="Symbol">{-#</a> <a id="341" class="Keyword">OPTIONS</a> <a id="349" class="Pragma">--without-K</a> <a id="361" class="Pragma">--exact-split</a> <a id="375" class="Pragma">--safe</a> <a id="382" class="Symbol">#-}</a>
 
@@ -25,19 +24,19 @@ This is the [Base.Relations.Continuous][] module of the [Agda Universal Algebra 
 
 <a id="781" class="Keyword">private</a> <a id="789" class="Keyword">variable</a> <a id="798" href="Base.Relations.Continuous.html#798" class="Generalizable">α</a> <a id="800" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a> <a id="802" class="Symbol">:</a> <a id="804" href="Agda.Primitive.html#591" class="Postulate">Level</a>
 
-<a id="811" class="Markup">\end{code}</a><a id="821" class="Background">
+</pre>
 
-#### &lt;a id=&quot;motivation&quot;&gt;Motivation&lt;/a&gt;
+#### <a id="motivation">Motivation</a>
 
 In set theory, an n-ary relation on a set `A` is simply a subset of the n-fold product `A × A × ⋯ × A`.  As such, we could model these as predicates over the type `A × A × ⋯ × A`, or as relations of type `A → A → ⋯ → A → Type β` (for some universe β).
 
 To implement such a relation in type theory, we would need to know the arity in advance, and then somehow form an n-fold arrow →.
 
-It&#39;s easier and more general to instead define an arity type `I : Type 𝓥`, and define the type representing `I`-ary relations on `A` as the function type `(I → A) → Type β`.
+It's easier and more general to instead define an arity type `I : Type 𝓥`, and define the type representing `I`-ary relations on `A` as the function type `(I → A) → Type β`.
 
 Then, if we are specifically interested in an n-ary relation for some natural number `n`, we could take `I` to be a finite set (e.g., of type `Fin n`).
 
-Below we define `Rel` to be the type `(I → A) → Type β` and we call this the type of *continuous relations*.  This generalizes &quot;discrete&quot; relations (i.e., relations of finite arity---unary, binary, etc), defined in the standard library since inhabitants of the continuous relation type can have arbitrary arity.
+Below we define `Rel` to be the type `(I → A) → Type β` and we call this the type of *continuous relations*.  This generalizes "discrete" relations (i.e., relations of finite arity---unary, binary, etc), defined in the standard library since inhabitants of the continuous relation type can have arbitrary arity.
 
 The relations of type `Rel` not completely general, however, since they are defined over a single type. Said another way, they are *single-sorted* relations. We will remove this limitation when we define the type of *dependent continuous relations* later in the module.
 
@@ -45,18 +44,18 @@ Just as `Rel A β` is the single-sorted special case of the multisorted `REL A B
 
 The latter represents relations that not only have arbitrary arities, but also are defined over arbitrary families of types.
 
-Concretely, given an arbitrary family `A : I → Type α` of types, we may have a relation from `A i` to `A j` to `A k` to …, where the collection represented by the &quot;indexing&quot; type `I` might not even be enumerable.
+Concretely, given an arbitrary family `A : I → Type α` of types, we may have a relation from `A i` to `A j` to `A k` to …, where the collection represented by the "indexing" type `I` might not even be enumerable.
 
 We refer to such relations as *dependent continuous relations* (or *dependent relations* for short) because the definition of a type that represents them requires depedent types.
 
 The `REL` type that we define [below](Base.Relations.Continuous.html#dependent-relations) manifests this completely general notion of relation.
 
-**Warning**! The type of binary relations in the standard library&#39;s `Relation.Binary` module is also called `Rel`.  Therefore, to use both the discrete binary relation from the standard library, and our continuous relation type, we recommend renaming the former when importing with a line like this
+**Warning**! The type of binary relations in the standard library's `Relation.Binary` module is also called `Rel`.  Therefore, to use both the discrete binary relation from the standard library, and our continuous relation type, we recommend renaming the former when importing with a line like this
 
 `open import Relation.Binary  renaming ( REL to BinREL ; Rel to BinRel )`
 
 
-#### &lt;a id=&quot;continuous-and-dependent-relations&quot;&gt;Continuous and dependent relations&lt;/a&gt;
+#### <a id="continuous-and-dependent-relations">Continuous and dependent relations</a>
 
 Here we define the types `Rel` and `REL`. The first of these represents predicates of arbitrary arity over a single type `A`. As noted above, we call these *continuous relations*.
 
@@ -68,7 +67,7 @@ Heuristically, we can think of an inhabitant of type `REL I 𝒜 β` as a relati
 
 (This is only a rough heuristic since `I` could denote an uncountable collection.)  See the discussion below for a more detailed explanation.
 
-</a><a id="4329" class="Markup">\begin{code}</a>
+<pre class="Agda">
 
 <a id="4343" class="Keyword">module</a> <a id="4350" href="Base.Relations.Continuous.html#4350" class="Module">_</a> <a id="4352" class="Symbol">{</a><a id="4353" href="Base.Relations.Continuous.html#4353" class="Bound">𝓥</a> <a id="4355" class="Symbol">:</a> <a id="4357" href="Agda.Primitive.html#591" class="Postulate">Level</a><a id="4362" class="Symbol">}</a> <a id="4364" class="Keyword">where</a>
  <a id="4371" href="Base.Relations.Continuous.html#4371" class="Function">ar</a> <a id="4374" class="Symbol">:</a> <a id="4376" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="4381" class="Symbol">(</a><a id="4382" href="Agda.Primitive.html#774" class="Primitive">suc</a> <a id="4386" href="Base.Relations.Continuous.html#4353" class="Bound">𝓥</a><a id="4387" class="Symbol">)</a>
@@ -94,34 +93,34 @@ Heuristically, we can think of an inhabitant of type `REL I 𝒜 β` as a relati
  <a id="4992" class="Keyword">syntax</a> <a id="4999" href="Base.Relations.Continuous.html#4882" class="Function">REL-syntax</a> <a id="5010" class="Bound">I</a> <a id="5012" class="Symbol">(λ</a> <a id="5015" class="Bound">i</a> <a id="5017" class="Symbol">→</a> <a id="5019" class="Bound">𝒜</a><a id="5020" class="Symbol">)</a> <a id="5022" class="Symbol">=</a> <a id="5024" class="Function">REL[</a> <a id="5029" class="Bound">i</a> <a id="5031" class="Function">∈</a> <a id="5033" class="Bound">I</a> <a id="5035" class="Function">]</a> <a id="5037" class="Bound">𝒜</a>
  <a id="5040" class="Keyword">infix</a> <a id="5046" class="Number">6</a> <a id="5048" href="Base.Relations.Continuous.html#4882" class="Function">REL-syntax</a>
 
-<a id="5060" class="Markup">\end{code}</a><a id="5070" class="Background">
+</pre>
 
-#### &lt;a id=&quot;compatibility-with-general-relations&quot;&gt;Compatibility with general relations&lt;/a&gt;
+#### <a id="compatibility-with-general-relations">Compatibility with general relations</a>
 
-</a><a id="5164" class="Markup">\begin{code}</a>
+<pre class="Agda">
 
  <a id="5179" class="Comment">-- Lift a relation of tuples up to a relation on tuples of tuples.</a>
  <a id="5247" href="Base.Relations.Continuous.html#5247" class="Function">eval-Rel</a> <a id="5256" class="Symbol">:</a> <a id="5258" class="Symbol">{</a><a id="5259" href="Base.Relations.Continuous.html#5259" class="Bound">I</a> <a id="5261" class="Symbol">:</a> <a id="5263" href="Base.Relations.Continuous.html#4371" class="Function">ar</a><a id="5265" class="Symbol">}{</a><a id="5267" href="Base.Relations.Continuous.html#5267" class="Bound">A</a> <a id="5269" class="Symbol">:</a> <a id="5271" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="5276" href="Base.Relations.Continuous.html#798" class="Generalizable">α</a><a id="5277" class="Symbol">}</a> <a id="5279" class="Symbol">→</a> <a id="5281" href="Base.Relations.Continuous.html#4456" class="Function">Rel</a> <a id="5285" href="Base.Relations.Continuous.html#5267" class="Bound">A</a> <a id="5287" href="Base.Relations.Continuous.html#5259" class="Bound">I</a><a id="5288" class="Symbol">{</a><a id="5289" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a><a id="5290" class="Symbol">}</a> <a id="5292" class="Symbol">→</a> <a id="5294" class="Symbol">(</a><a id="5295" href="Base.Relations.Continuous.html#5295" class="Bound">J</a> <a id="5297" class="Symbol">:</a> <a id="5299" href="Base.Relations.Continuous.html#4371" class="Function">ar</a><a id="5301" class="Symbol">)</a> <a id="5303" class="Symbol">→</a> <a id="5305" class="Symbol">(</a><a id="5306" href="Base.Relations.Continuous.html#5259" class="Bound">I</a> <a id="5308" class="Symbol">→</a> <a id="5310" href="Base.Relations.Continuous.html#5295" class="Bound">J</a> <a id="5312" class="Symbol">→</a> <a id="5314" href="Base.Relations.Continuous.html#5267" class="Bound">A</a><a id="5315" class="Symbol">)</a> <a id="5317" class="Symbol">→</a> <a id="5319" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="5324" class="Symbol">(</a><a id="5325" href="Base.Relations.Continuous.html#4353" class="Bound">𝓥</a> <a id="5327" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="5329" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a><a id="5330" class="Symbol">)</a>
  <a id="5333" href="Base.Relations.Continuous.html#5247" class="Function">eval-Rel</a> <a id="5342" href="Base.Relations.Continuous.html#5342" class="Bound">R</a> <a id="5344" href="Base.Relations.Continuous.html#5344" class="Bound">J</a> <a id="5346" href="Base.Relations.Continuous.html#5346" class="Bound">t</a> <a id="5348" class="Symbol">=</a> <a id="5350" class="Symbol">∀</a> <a id="5352" class="Symbol">(</a><a id="5353" href="Base.Relations.Continuous.html#5353" class="Bound">j</a> <a id="5355" class="Symbol">:</a> <a id="5357" href="Base.Relations.Continuous.html#5344" class="Bound">J</a><a id="5358" class="Symbol">)</a> <a id="5360" class="Symbol">→</a> <a id="5362" href="Base.Relations.Continuous.html#5342" class="Bound">R</a> <a id="5364" class="Symbol">λ</a> <a id="5366" href="Base.Relations.Continuous.html#5366" class="Bound">i</a> <a id="5368" class="Symbol">→</a> <a id="5370" href="Base.Relations.Continuous.html#5346" class="Bound">t</a> <a id="5372" href="Base.Relations.Continuous.html#5366" class="Bound">i</a> <a id="5374" href="Base.Relations.Continuous.html#5353" class="Bound">j</a>
 
-<a id="5377" class="Markup">\end{code}</a><a id="5387" class="Background">
+</pre>
 
 A relation `R` is compatible with an operation `f` if for every tuple `t` of tuples
 belonging to `R`, the tuple whose elements are the result of applying `f` to
 sections of `t` also belongs to `R`.
 
-</a><a id="5588" class="Markup">\begin{code}</a>
+<pre class="Agda">
 
  <a id="5603" href="Base.Relations.Continuous.html#5603" class="Function">compatible-Rel</a> <a id="5618" class="Symbol">:</a> <a id="5620" class="Symbol">{</a><a id="5621" href="Base.Relations.Continuous.html#5621" class="Bound">I</a> <a id="5623" href="Base.Relations.Continuous.html#5623" class="Bound">J</a> <a id="5625" class="Symbol">:</a> <a id="5627" href="Base.Relations.Continuous.html#4371" class="Function">ar</a><a id="5629" class="Symbol">}{</a><a id="5631" href="Base.Relations.Continuous.html#5631" class="Bound">A</a> <a id="5633" class="Symbol">:</a> <a id="5635" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="5640" href="Base.Relations.Continuous.html#798" class="Generalizable">α</a><a id="5641" class="Symbol">}</a> <a id="5643" class="Symbol">→</a> <a id="5645" href="Overture.Operations.html#1235" class="Function">Op</a><a id="5647" class="Symbol">(</a><a id="5648" href="Base.Relations.Continuous.html#5631" class="Bound">A</a><a id="5649" class="Symbol">)</a> <a id="5651" href="Base.Relations.Continuous.html#5623" class="Bound">J</a> <a id="5653" class="Symbol">→</a> <a id="5655" href="Base.Relations.Continuous.html#4456" class="Function">Rel</a> <a id="5659" href="Base.Relations.Continuous.html#5631" class="Bound">A</a> <a id="5661" href="Base.Relations.Continuous.html#5621" class="Bound">I</a><a id="5662" class="Symbol">{</a><a id="5663" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a><a id="5664" class="Symbol">}</a> <a id="5666" class="Symbol">→</a> <a id="5668" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="5673" class="Symbol">(</a><a id="5674" href="Base.Relations.Continuous.html#4353" class="Bound">𝓥</a> <a id="5676" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="5678" href="Base.Relations.Continuous.html#798" class="Generalizable">α</a> <a id="5680" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="5682" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a><a id="5683" class="Symbol">)</a>
  <a id="5686" href="Base.Relations.Continuous.html#5603" class="Function">compatible-Rel</a> <a id="5701" href="Base.Relations.Continuous.html#5701" class="Bound">f</a> <a id="5703" href="Base.Relations.Continuous.html#5703" class="Bound">R</a>  <a id="5706" class="Symbol">=</a> <a id="5708" class="Symbol">∀</a> <a id="5710" href="Base.Relations.Continuous.html#5710" class="Bound">t</a> <a id="5712" class="Symbol">→</a> <a id="5714" href="Base.Relations.Continuous.html#5247" class="Function">eval-Rel</a> <a id="5723" href="Base.Relations.Continuous.html#5703" class="Bound">R</a> <a id="5725" href="Overture.Operations.html#1672" class="Function Operator">arity[</a> <a id="5732" href="Base.Relations.Continuous.html#5701" class="Bound">f</a> <a id="5734" href="Overture.Operations.html#1672" class="Function Operator">]</a> <a id="5736" href="Base.Relations.Continuous.html#5710" class="Bound">t</a> <a id="5738" class="Symbol">→</a> <a id="5740" href="Base.Relations.Continuous.html#5703" class="Bound">R</a> <a id="5742" class="Symbol">λ</a> <a id="5744" href="Base.Relations.Continuous.html#5744" class="Bound">i</a> <a id="5746" class="Symbol">→</a> <a id="5748" href="Base.Relations.Continuous.html#5701" class="Bound">f</a> <a id="5750" class="Symbol">(</a><a id="5751" href="Base.Relations.Continuous.html#5710" class="Bound">t</a> <a id="5753" href="Base.Relations.Continuous.html#5744" class="Bound">i</a><a id="5754" class="Symbol">)</a>
  <a id="5757" class="Comment">-- (inferred type of t is I → J → A)</a>
 
-<a id="5795" class="Markup">\end{code}</a><a id="5805" class="Background">
+</pre>
 
 
-#### &lt;a id=&quot;compatibility-of-operations-with-dependent-relations&quot;&gt;Compatibility of operations with dependent relations&lt;/a&gt;
+#### <a id="compatibility-of-operations-with-dependent-relations">Compatibility of operations with dependent relations</a>
 
-</a><a id="5932" class="Markup">\begin{code}</a>
+<pre class="Agda">
 
  <a id="5947" href="Base.Relations.Continuous.html#5947" class="Function">eval-REL</a> <a id="5956" class="Symbol">:</a>  <a id="5959" class="Symbol">{</a><a id="5960" href="Base.Relations.Continuous.html#5960" class="Bound">I</a> <a id="5962" href="Base.Relations.Continuous.html#5962" class="Bound">J</a> <a id="5964" class="Symbol">:</a> <a id="5966" href="Base.Relations.Continuous.html#4371" class="Function">ar</a><a id="5968" class="Symbol">}{</a><a id="5970" href="Base.Relations.Continuous.html#5970" class="Bound">𝒜</a> <a id="5972" class="Symbol">:</a> <a id="5974" href="Base.Relations.Continuous.html#5960" class="Bound">I</a> <a id="5976" class="Symbol">→</a> <a id="5978" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="5983" href="Base.Relations.Continuous.html#798" class="Generalizable">α</a><a id="5984" class="Symbol">}</a>
   <a id="5988" class="Symbol">→</a>          <a id="5999" href="Base.Relations.Continuous.html#4773" class="Function">REL</a> <a id="6003" href="Base.Relations.Continuous.html#5960" class="Bound">I</a> <a id="6005" href="Base.Relations.Continuous.html#5970" class="Bound">𝒜</a> <a id="6007" class="Symbol">{</a><a id="6008" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a><a id="6009" class="Symbol">}</a>          <a id="6020" class="Comment">-- the relation type: subsets of Π[ i ∈ I ] 𝒜 i</a>
@@ -138,7 +137,7 @@ sections of `t` also belongs to `R`.
   <a id="6652" class="Symbol">→</a>                <a id="6669" href="Base.Relations.Continuous.html#565" class="Primitive">Type</a> <a id="6674" class="Symbol">(</a><a id="6675" href="Base.Relations.Continuous.html#4353" class="Bound">𝓥</a> <a id="6677" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="6679" href="Base.Relations.Continuous.html#798" class="Generalizable">α</a> <a id="6681" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="6683" href="Base.Relations.Continuous.html#800" class="Generalizable">ρ</a><a id="6684" class="Symbol">)</a>
  <a id="6687" href="Base.Relations.Continuous.html#6317" class="Function">compatible-REL</a> <a id="6702" class="Symbol">{</a><a id="6703" class="Argument">I</a> <a id="6705" class="Symbol">=</a> <a id="6707" href="Base.Relations.Continuous.html#6707" class="Bound">I</a><a id="6708" class="Symbol">}{</a><a id="6710" href="Base.Relations.Continuous.html#6710" class="Bound">J</a><a id="6711" class="Symbol">}{</a><a id="6713" href="Base.Relations.Continuous.html#6713" class="Bound">𝒜</a><a id="6714" class="Symbol">}</a> <a id="6716" href="Base.Relations.Continuous.html#6716" class="Bound">𝑓</a> <a id="6718" href="Base.Relations.Continuous.html#6718" class="Bound">R</a>  <a id="6721" class="Symbol">=</a> <a id="6723" href="Overture.Basic.html#6012" class="Function">Π[</a> <a id="6726" href="Base.Relations.Continuous.html#6726" class="Bound">t</a> <a id="6728" href="Overture.Basic.html#6012" class="Function">∈</a> <a id="6730" class="Symbol">((</a><a id="6732" href="Base.Relations.Continuous.html#6732" class="Bound">i</a> <a id="6734" class="Symbol">:</a> <a id="6736" href="Base.Relations.Continuous.html#6707" class="Bound">I</a><a id="6737" class="Symbol">)</a> <a id="6739" class="Symbol">→</a> <a id="6741" href="Base.Relations.Continuous.html#6710" class="Bound">J</a> <a id="6743" class="Symbol">→</a> <a id="6745" href="Base.Relations.Continuous.html#6713" class="Bound">𝒜</a> <a id="6747" href="Base.Relations.Continuous.html#6732" class="Bound">i</a><a id="6748" class="Symbol">)</a> <a id="6750" href="Overture.Basic.html#6012" class="Function">]</a> <a id="6752" href="Base.Relations.Continuous.html#5947" class="Function">eval-REL</a> <a id="6761" href="Base.Relations.Continuous.html#6718" class="Bound">R</a> <a id="6763" href="Base.Relations.Continuous.html#6726" class="Bound">t</a>
 
-<a id="6766" class="Markup">\end{code}</a><a id="6776" class="Background">
+</pre>
 
 The definition `eval-REL` denotes an *evaluation* function which lifts an `I`-ary relation to an `(I → J)`-ary relation.
 
@@ -148,7 +147,7 @@ to the original relation.
 The second definition, compatible-REL,  denotes compatibility of an operation with a continuous relation.
 
 
-#### &lt;a id=&quot;detailed-explanation-of-the-dependent-relation-type&quot;&gt;Detailed explanation of the dependent relation type&lt;/a&gt;
+#### <a id="detailed-explanation-of-the-dependent-relation-type">Detailed explanation of the dependent relation type</a>
 
 The last two definitions above may be hard to comprehend at first, so perhaps a more detailed explanation of the semantics of these deifnitions would help.
 
@@ -164,7 +163,7 @@ For example, here are the i-th and k-th columns (for some `i k : I`).
 
 ```
 𝒶 i 1      𝒶 k 1
-𝒶 i 2      𝒶 k 2  &lt;-- (a row of I such columns forms an I-tuple)
+𝒶 i 2      𝒶 k 2  <-- (a row of I such columns forms an I-tuple)
   ⋮          ⋮
 𝒶 i J      𝒶 k J
 ```
@@ -180,10 +179,9 @@ and determines whether the `I`-tuple `λ i → (𝑓 i) (𝑎 i)` belongs to `R`
 
 --------------------------------------
 
-&lt;span style=&quot;float:left;&quot;&gt;[← Base.Relations.Discrete](Base.Relations.Discrete.html)&lt;/span&gt;
-&lt;span style=&quot;float:right;&quot;&gt;[Base.Relations.Properties →](Base.Relations.Properties.html)&lt;/span&gt;
+<span style="float:left;">[← Base.Relations.Discrete](Base.Relations.Discrete.html)</span>
+<span style="float:right;">[Base.Relations.Properties →](Base.Relations.Properties.html)</span>
 
 {% include UALib.Links.md %}
 
 [agda-algebras development team]: https://github.com/ualib/agda-algebras#the-agda-algebras-development-team
-</a></pre></body></html>
