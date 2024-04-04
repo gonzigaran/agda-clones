@@ -13,6 +13,6 @@ author: "Gonzalo Zigarán"
 open import Agda.Primitive               using () renaming ( Set to Type )
 open import Level                        using ( _⊔_ ; Level ; suc )
 
-module Clones.BakerPixlar (α : Level) (A : Type α) where
+module Clones.BakerPixley  (α : Level) (A : Type α) where
 
 ```

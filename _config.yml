@@ -1,9 +1,0 @@
-name: Agda Clones
-exclude:
-  - "*.agdai"
-  - "*.lagda"
-  - "*.agda"
-  - "*.hs"
-  - "*.hi"
-  - "*.o"
-  - "README.md"
