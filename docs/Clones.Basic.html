@@ -1,13 +1,4 @@
----
-layout: default
-title : "Clones.Basic module"
-date : "2023-10-18"
-author: "Gonzalo Zigarán"
----
-
-# Clones: Basic definitions
-
-
+<h1 id="clones-basic-definitions">Clones: Basic definitions</h1>
 <pre class="Agda"><a id="140" class="Keyword">module</a> <a id="147" href="Clones.Basic.html" class="Module">Clones.Basic</a> <a id="160" class="Keyword">where</a>
 
 <a id="167" class="Keyword">open</a> <a id="172" class="Keyword">import</a> <a id="179" href="Agda.Primitive.html" class="Module">Agda.Primitive</a>               <a id="208" class="Keyword">using</a> <a id="214" class="Symbol">()</a> <a id="217" class="Keyword">renaming</a> <a id="226" class="Symbol">(</a> <a id="228" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="232" class="Symbol">to</a> <a id="235" class="Primitive">Type</a> <a id="240" class="Symbol">)</a>
@@ -20,10 +11,8 @@ author: "Gonzalo Zigarán"
 <a id="546" class="Keyword">private</a> <a id="554" class="Keyword">variable</a> <a id="563" href="Clones.Basic.html#563" class="Generalizable">α</a> <a id="565" href="Clones.Basic.html#565" class="Generalizable">ρ</a> <a id="567" class="Symbol">:</a> <a id="569" href="Agda.Primitive.html#591" class="Postulate">Level</a>
 
 </pre>
-## Operaciones y Relaciones
-
-Para un conjunto $A$ y un $n ∈ ℕ$, definimos el conjunto de operaciones $n$-arias, y luego el conjunto de operaciones de aridad finita.
-
+<h2 id="operaciones-y-relaciones">Operaciones y Relaciones</h2>
+<p>Para un conjunto <span class="math inline"><em>A</em></span> y un <span class="math inline"><em>n</em> ∈ <em>ℕ</em></span>, definimos el conjunto de operaciones <span class="math inline"><em>n</em></span>-arias, y luego el conjunto de operaciones de aridad finita.</p>
 <pre class="Agda">
 <a id="756" class="Keyword">open</a> <a id="761" class="Keyword">import</a> <a id="768" href="Overture.html" class="Module">Overture</a>        <a id="784" class="Keyword">using</a> <a id="790" class="Symbol">(</a> <a id="792" href="Overture.Operations.html#1235" class="Function">Op</a> <a id="795" class="Symbol">)</a>
 <a id="797" class="Comment">-- Operaciones de aridad finita</a>
@@ -34,8 +23,7 @@ Para un conjunto $A$ y un $n ∈ ℕ$, definimos el conjunto de operaciones $n$-
 <a id="924" href="Clones.Basic.html#899" class="Function">FinOps</a> <a id="931" href="Clones.Basic.html#931" class="Bound">A</a> <a id="933" class="Symbol">=</a> <a id="935" href="Data.Product.html#925" class="Function">Σ[</a> <a id="938" href="Clones.Basic.html#938" class="Bound">n</a> <a id="940" href="Data.Product.html#925" class="Function">∈</a> <a id="942" href="Agda.Builtin.Nat.html#186" class="Datatype">ℕ</a> <a id="944" href="Data.Product.html#925" class="Function">]</a> <a id="946" class="Symbol">(</a><a id="947" href="Clones.Basic.html#829" class="Function">FinOp</a> <a id="953" class="Symbol">{</a><a id="954" class="Argument">n</a> <a id="956" class="Symbol">=</a> <a id="958" href="Clones.Basic.html#938" class="Bound">n</a><a id="959" class="Symbol">}</a> <a id="961" href="Clones.Basic.html#931" class="Bound">A</a><a id="962" class="Symbol">)</a>
 
 </pre>
-De la misma manera, el conjunto de relaciones con elementos de $A$ de aridad $n$, con $n ∈ ℕ$ fijo, y de relaciones de aridad finita
-
+<p>De la misma manera, el conjunto de relaciones con elementos de <span class="math inline"><em>A</em></span> de aridad <span class="math inline"><em>n</em></span>, con <span class="math inline"><em>n</em> ∈ <em>ℕ</em></span> fijo, y de relaciones de aridad finita</p>
 <pre class="Agda">
 <a id="1113" class="Keyword">open</a> <a id="1118" class="Keyword">import</a> <a id="1125" href="Base.Relations.Continuous.html" class="Module">Base.Relations.Continuous</a>    <a id="1154" class="Keyword">using</a> <a id="1160" class="Symbol">(</a> <a id="1162" href="Base.Relations.Continuous.html#4456" class="Function">Rel</a> <a id="1166" class="Symbol">)</a>
 <a id="1168" class="Comment">-- Relaciones de aridad finita</a>
@@ -46,13 +34,12 @@ De la misma manera, el conjunto de relaciones con elementos de $A$ de aridad $n$
 <a id="1311" href="Clones.Basic.html#1279" class="Function">FinRels</a> <a id="1319" href="Clones.Basic.html#1319" class="Bound">A</a> <a id="1321" class="Symbol">=</a> <a id="1323" href="Data.Product.html#925" class="Function">Σ[</a> <a id="1326" href="Clones.Basic.html#1326" class="Bound">n</a> <a id="1328" href="Data.Product.html#925" class="Function">∈</a> <a id="1330" href="Agda.Builtin.Nat.html#186" class="Datatype">ℕ</a> <a id="1332" href="Data.Product.html#925" class="Function">]</a> <a id="1334" class="Symbol">(</a><a id="1335" href="Clones.Basic.html#1199" class="Function">FinRel</a> <a id="1342" class="Symbol">{</a><a id="1343" class="Argument">n</a> <a id="1345" class="Symbol">=</a> <a id="1347" href="Clones.Basic.html#1326" class="Bound">n</a><a id="1348" class="Symbol">}</a> <a id="1350" href="Clones.Basic.html#1319" class="Bound">A</a><a id="1351" class="Symbol">)</a>
 
 </pre>
-## Clones
-
-Difinimos a un clon de $A$ como un conjunto de operaciones en $A$ que cumple que:
-
-- Contiene todas las proyecciones.
-- Es cerrado por composiciones.
-
+<h2 id="clones">Clones</h2>
+<p>Difinimos a un clon de <span class="math inline"><em>A</em></span> como un conjunto de operaciones en <span class="math inline"><em>A</em></span> que cumple que:</p>
+<ul>
+<li>Contiene todas las proyecciones.</li>
+<li>Es cerrado por composiciones.</li>
+</ul>
 <pre class="Agda"><a id="1529" class="Comment">-- Funcion proyeccion, proyecta en la coordenada dada, infiere la aridad</a>
 <a id="π"></a><a id="1602" href="Clones.Basic.html#1602" class="Function">π</a> <a id="1604" class="Symbol">:</a> <a id="1606" class="Symbol">{</a><a id="1607" href="Clones.Basic.html#1607" class="Bound">A</a> <a id="1609" class="Symbol">:</a> <a id="1611" href="Clones.Basic.html#235" class="Primitive">Type</a> <a id="1616" href="Clones.Basic.html#563" class="Generalizable">α</a><a id="1617" class="Symbol">}</a> <a id="1619" class="Symbol">→</a> <a id="1621" class="Symbol">{</a> <a id="1623" href="Clones.Basic.html#1623" class="Bound">n</a> <a id="1625" class="Symbol">:</a> <a id="1627" href="Agda.Builtin.Nat.html#186" class="Datatype">ℕ</a> <a id="1629" class="Symbol">}</a> <a id="1631" class="Symbol">→</a> <a id="1633" href="Data.Fin.Base.html#1135" class="Datatype">Fin</a> <a id="1637" href="Clones.Basic.html#1623" class="Bound">n</a> <a id="1639" class="Symbol">→</a> <a id="1641" href="Clones.Basic.html#829" class="Function">FinOp</a> <a id="1647" href="Clones.Basic.html#1607" class="Bound">A</a>
 <a id="1649" href="Clones.Basic.html#1602" class="Function">π</a> <a id="1651" href="Clones.Basic.html#1651" class="Bound">k</a> <a id="1653" class="Symbol">=</a> <a id="1655" class="Symbol">λ</a> <a id="1657" href="Clones.Basic.html#1657" class="Bound">x</a> <a id="1659" class="Symbol">→</a> <a id="1661" href="Clones.Basic.html#1657" class="Bound">x</a> <a id="1663" href="Clones.Basic.html#1651" class="Bound">k</a> 
@@ -80,10 +67,8 @@ Difinimos a un clon de $A$ como un conjunto de operaciones en $A$ que cumple que
     <a id="Clon.FIsClon"></a><a id="2569" href="Clones.Basic.html#2569" class="Field">FIsClon</a> <a id="2577" class="Symbol">:</a> <a id="2579" href="Clones.Basic.html#2254" class="Function">isClon</a> <a id="2586" href="Clones.Basic.html#2542" class="Field">F</a>
 
 </pre>
-### Clon generado
-
-A partir de un conjunto $F$ de operaciones en $A$ podemos hablar del clon generado por $F$ como el menor clon que contiene a $F$. Lo denotamos con [ $F$ ].
-
+<h3 id="clon-generado">Clon generado</h3>
+<p>A partir de un conjunto <span class="math inline"><em>F</em></span> de operaciones en <span class="math inline"><em>A</em></span> podemos hablar del clon generado por <span class="math inline"><em>F</em></span> como el menor clon que contiene a <span class="math inline"><em>F</em></span>. Lo denotamos con [ <span class="math inline"><em>F</em></span> ].</p>
 <pre class="Agda">
 <a id="2779" class="Comment">-- clon generado</a>
 <a id="2796" class="Keyword">data</a> <a id="[_]"></a><a id="2801" href="Clones.Basic.html#2801" class="Datatype Operator">[_]</a> <a id="2805" class="Symbol">{</a><a id="2806" href="Clones.Basic.html#2806" class="Bound">A</a> <a id="2808" class="Symbol">:</a> <a id="2810" href="Clones.Basic.html#235" class="Primitive">Type</a> <a id="2815" href="Clones.Basic.html#563" class="Generalizable">α</a><a id="2816" class="Symbol">}</a> <a id="2818" class="Symbol">(</a><a id="2819" href="Clones.Basic.html#2819" class="Bound">F</a> <a id="2821" class="Symbol">:</a> <a id="2823" href="Relation.Unary.html#1110" class="Function">Pred</a> <a id="2828" class="Symbol">(</a><a id="2829" href="Clones.Basic.html#899" class="Function">FinOps</a> <a id="2836" href="Clones.Basic.html#2806" class="Bound">A</a><a id="2837" class="Symbol">)</a> <a id="2839" href="Clones.Basic.html#565" class="Generalizable">ρ</a><a id="2840" class="Symbol">)</a> <a id="2842" class="Symbol">:</a> <a id="2844" href="Relation.Unary.html#1110" class="Function">Pred</a> <a id="2849" class="Symbol">(</a><a id="2850" href="Clones.Basic.html#899" class="Function">FinOps</a> <a id="2857" href="Clones.Basic.html#2806" class="Bound">A</a><a id="2858" class="Symbol">)</a> <a id="2860" class="Symbol">(</a><a id="2861" href="Agda.Primitive.html#774" class="Primitive">suc</a> <a id="2865" href="Agda.Primitive.html#758" class="Primitive">Level.zero</a> <a id="2876" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="2878" href="Clones.Basic.html#2815" class="Bound">α</a> <a id="2880" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="2882" href="Clones.Basic.html#2839" class="Bound">ρ</a><a id="2883" class="Symbol">)</a>
