@@ -194,9 +194,17 @@ open import Relation.Unary using ( _∈_ )
 [F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₂ (k , pf=π)) x₁) = (Term.node (( m , f ) , {!!})  λ i → proj₁ (ihgs i)) , (λ x → {!!}) -- tengo el problema que no se que la f esté en F 
   where ihgs : ( i : Fin m) → ( n , gs i ) ∈ Clo[ _ , F ]
         ihgs i = [F]⊆Clo[A,F] F ( n , gs i) (x₁ i)
-[F]⊆Clo[A,F] F (n , f) ([_].extensionality ( .n , h ) hin[F] .f h=f) = proj₁ ihh , λ x → {!proj₂ ihh!} -- se que son iguales pero no se como decirselo, hay que usar h=f de alguna manera
+[F]⊆Clo[A,F] {A = A} F (n , f) ([_].extensionality ( .n , h ) hin[F] .f h=f) = proj₁ ihh , λ x →  f x
+                                                                                         ≡⟨ sym (h=f x) ⟩
+                                                                                          h x
+                                                                                         ≡⟨ (proj₂ ihh) x ⟩
+                                                                                          (⟨ A , F , R∅ ⟩ ⟦ proj₁ ihh ⟧) x
+                                                                                         ∎
   where ihh : ( n , h ) ∈ Clo[ _ , F ]
         ihh = [F]⊆Clo[A,F] F ( n , h ) hin[F]
+
+
+
 
 
 Clo[A,F]⊆[F] : {A : Type α} (F : Pred (FinOps A) ρ) ( ( n , f ) : FinOps A)
@@ -207,9 +215,11 @@ Clo[A,F]⊆[F] F (n , f) (Term.ℊ k , snd) = [_].extensionality (( n , π k )) 
 Clo[A,F]⊆[F] {A = A} F (n , f) (Term.node ((m , g) , ginF) t , pf=) = [_].extensionality (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs))) gin[F] f λ x → sym (pf= x) 
   where iht : (i : Fin m) → (n , (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧)) ∈ [ F ]
         iht i = Clo[A,F]⊆[F] F (n , (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧)) ((t i) , (λ x → refl))
-        ih' : (i : Fin m) → (f' : FinOp {n = n} A) → f' ≈ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t i ⟧) → (n , f') ∈ [ F ] -- f' x ≡ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t i ⟧) x → (n , )
+
+        ih' : (i : Fin m) → (f' : FinOp {n = n} A) → f' ≈ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t i ⟧) → (n , f') ∈ [ F ] 
         ih' i f' x = Clo[A,F]⊆[F] F (n , f') ((t i) , x)
+
         gin[F] : [ F ] (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs)))
-        gin[F] = [_].compositions n m g ( (λ i → (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧))) (inj₁ ginF) λ i → ih' i (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧) {!λ x → refl!} 
+        gin[F] = [_].compositions n m g ( (λ i → (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧))) (inj₁ ginF) {!!} 
 
 ```
