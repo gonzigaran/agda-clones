@@ -39,7 +39,7 @@ $(f(a₁₁, ..., aₙ₁), ..., f(a₁ₖ, ..., aₙₖ)) ∈ r$.
 
 open import Clones.Basic using ( FinOp ; FinRel )
 
--- Se fija que k vectores de largo n, coordeanada a coordenada, pertenezcan a la relación de aridad k
+-- Funcion que chequea que k vectores de largo n, coordeanada a coordenada, pertenezcan a la relación de aridad k
 evalFinRel : {A : Type α } → { k : ℕ } → FinRel { n = k} A  → ( n : ℕ) → (Fin k → Fin n → A) → Type α
 evalFinRel r n t = ∀ (j : Fin n) → r λ i → t i j 
 
@@ -62,14 +62,13 @@ preserv-then-r-subuniv : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n = n} A 
                        → (f ◃ r)
                        ---------
                        → Subuniverses {𝑨 = ⨅ {ℑ = Fin k } (λ i → ⟨  A , (λ g → g ≡ ( n , f )) , R∅ ⟩)} {X = Type ρ} r
-preserv-then-r-subuniv f r pfr = λ ( ( m , h ) , pmh≡nf ) a x → {!!}
+preserv-then-r-subuniv f r pf◃r ((m , .f) , Eq.refl) a x = pf◃r (λ i j → a j i) x
 
 r-subuniv-then-preserv : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n = n} A )  (r : FinRel {n = k} A )
                        → Subuniverses {𝑨 = ⨅ {ℑ = Fin k } (λ i → ⟨  A , (λ g → g ≡ ( n , f )) , R∅ ⟩)} {X = Type ρ} r
                        ---------
                        → (f ◃ r)
-r-subuniv-then-preserv f r psubr = λ t → λ prtij → {!!}
--- r-subuniv-then-preserv f r psubr = λ t → λ prtij → {!!}
+r-subuniv-then-preserv f r psubr t prtij = {!!}
 
 ```
 
@@ -83,7 +82,7 @@ preserv-then-f-homo : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n = n} A )  
                     → (f ◃ r)
                     ----------
                     → is-hom-rel ( ⨅ {ℑ = Fin n } (λ i → ⟨  A , F∅ , (λ s → s ≡ ( k , r ) ) ⟩ ))  ⟨  A , F∅ , (λ s → s ≡ ( k , r ) ) ⟩ f
-preserv-then-f-homo f r pfr = λ ( ( m , s ) , ps ) → λ as → λ i → {!!} 
+preserv-then-f-homo f r pfr = λ ( ( m , s ) , ps≡r ) → λ as → λ i → {!!} 
 
 f-homo-then-preserv : {A : Type α} → ∀ {n k : ℕ} (f : FinOp {n = n} A )  (r : FinRel {n = k} A )
                     → is-hom-rel ( ⨅ {ℑ = Fin n } (λ i → ⟨  A , F∅ , (λ s → s ≡ ( k , r ) ) ⟩ ))  ⟨  A , F∅ , (λ s → s ≡ ( k , r ) ) ⟩ f

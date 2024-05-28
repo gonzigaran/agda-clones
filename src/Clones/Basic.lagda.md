@@ -15,10 +15,13 @@ open import Agda.Primitive               using () renaming ( Set to Type )
 open import Level                        using ( _⊔_ ; Level ; suc )
 open import Data.Nat                     using ( ℕ )
 open import Data.Fin                     using ( Fin )
-open import Data.Product                 using ( _×_ ; Σ-syntax ; _,_ )
+open import Data.Product                 using ( _×_ ; Σ-syntax ; proj₁ ; proj₂ ; _,_ )
 open import Relation.Unary       using ( Pred ; _∈_ )
 
-private variable α ρ : Level
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using ( _≡_; refl; sym )
+
+private variable α ρ β : Level
 
 ```
 
@@ -60,22 +63,33 @@ Difinimos a un clon de $A$ como un conjunto de operaciones en $A$ que cumple que
 - Es cerrado por composiciones.
 
 ```agda
+
+open import Overture        using ( _≈_ )
+open import Data.Sum.Base using ( _⊎_ ; inj₁ ; inj₂ )
+
 -- Funcion proyeccion, proyecta en la coordenada dada, infiere la aridad
 π : {A : Type α} → { n : ℕ } → Fin n → FinOp A
-π k = λ x → x k 
+π k = λ x → x k
+
+Projs : {A : Type α} → Pred (FinOps A) α
+Projs ( n , f ) =  Σ[ k ∈ Fin n ] (f ≈ π { n = n } k)
 
 -- Definimos propiedades que tiene que cumplir un Clon
 containsProjections : {A : Type α} → Pred (FinOps A) ρ → Type ρ
 containsProjections F = ∀ (n : ℕ) → ∀ (k : Fin n) → F ( n , π {n = n} k )
 
-containsCompositions : {A : Type α} → Pred (FinOps A) ρ → Type (α ⊔ ρ)
-containsCompositions {A = A} F = (n m : ℕ)(f : FinOp {n = m} A )(gs : (Fin m → FinOp {n = n} A))
-                                   → F ( m , f )
-                                   → (∀ (i : Fin m) → F ( n , gs i ))
-                                   → F ( n , λ (xs : (Fin n → A)) → f (λ i → gs i xs) )
+containsCompositions : {A : Type α} → Pred (FinOps A) ρ → Pred (FinOps A) β → Type (α ⊔ ρ ⊔ β)
+containsCompositions {A = A} F₁ F₂ = (n m : ℕ)(f : FinOp {n = m} A )(gs : (Fin m → FinOp {n = n} A))
+                                   → (F₁ ( m , f )) ⊎ (Projs ( m , f ))
+                                   → (∀ (i : Fin m) → F₂ ( n , gs i ))
+                                   → F₂ ( n , λ (xs : (Fin n → A)) → f (λ i → gs i xs) )
+
+containsExtensionality : {A : Type α} → Pred (FinOps A) ρ → Type (α ⊔ ρ)
+-- containsExtensionality {A = A} F = (( n , f ) : FinOps A ) → Σ[ g ∈ FinOp {n = n} A ] (F ( n , g ) × f ≈ g)  → F ( n , f )
+containsExtensionality {A = A} F = (( n , f ) : FinOps A ) → F ( n , f ) → ( g : FinOp {n = n} A ) →  f ≈ g → F ( n , g )
 -- Definimos Clon
 isClon : {A : Type α} → Pred (FinOps A) ρ → Type (α ⊔ ρ)
-isClon F = containsProjections F × containsCompositions F
+isClon F = containsProjections F × containsCompositions F F × containsExtensionality F
 
 -- Clones : {A : Type α} → Pred (Pred (FinOps A) ρ) (α ⊔ ρ)
 -- Clones = λ F → isClon F 
@@ -99,9 +113,13 @@ data [_] {A : Type α} (F : Pred (FinOps A) ρ) : Pred (FinOps A) (suc Level.zer
   where
     ops : ∀ {f} → f ∈ F → f ∈ [ F ]
     projections : containsProjections [ F ]
-    compositions : containsCompositions [ F ]
+    compositions : containsCompositions F [ F ]
+    extensionality : containsExtensionality [ F ]
 
-GeneratedClonIsClon : {A : Type α} {F : Pred (FinOps A) ρ} → isClon {A = A} [ F ]
-GeneratedClonIsClon  = projections , compositions
+-- GeneratedClonIsClon : {A : Type α} {F : Pred (FinOps A) ρ} → isClon {A = A} [ F ]
+-- GeneratedClonIsClon = projections , compositions , extensionality
+
+π1 : {A : Type α} {n : ℕ} (F : Pred (FinOps A) ρ) → ( ℕ.suc n , π {n = ℕ.suc n} Fin.zero ) ∈ [ F ]
+π1 {n = n} F = projections (ℕ.suc n) Fin.zero
 
 ```

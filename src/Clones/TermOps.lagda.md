@@ -19,6 +19,7 @@ open import Level                        using ( _⊔_ ; Level ; suc )
 open import Data.Fin                     using ( Fin )
 open import Data.Product                 using ( Σ-syntax ; proj₁ ; proj₂ ; _,_ )
 open import Relation.Unary       using ( Pred  )
+open import Data.Sum.Base using ( _⊎_ ; inj₁ ; inj₂ )
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using ( _≡_; refl; sym )
@@ -36,7 +37,7 @@ Para un álgebra $𝑨$ dada, podemos hablar del Clon de $𝑨$ cómo todas las 
 ```agda
 
 -- term-operations
-open import Clones.Basic using ( FinOps ; FinRels )
+open import Clones.Basic using ( FinOps ; FinOp ; FinRels ; π ; Projs )
 open import Base.Structures.Basic using ( signature ; structure )
 open signature ; open structure
 open import Base.Terms.Basic using ( Term )
@@ -47,8 +48,13 @@ variable
  𝑅 : signature 𝓞₁ 𝓥₁
  
 TermOps : (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → Pred (FinOps ( carrier 𝑨 )) _
-TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
+TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (f ≈ 𝑨 ⟦ t ⟧)
+-- TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
 
+open import Data.Nat using ( ℕ )
+
+πinTermOps : {n : ℕ} (𝑨 : structure 𝐹 𝑅 {α} {ρ}) → (k : Fin n) → TermOps 𝑨 (n , π { n = n } k)
+πinTermOps A k = (Term.ℊ k) , (λ x → refl) 
 
 ```
 
@@ -68,22 +74,45 @@ subst-lemma-t wd (Term.node f t) s 𝑨 as = wd ((op 𝑨) f)  ( λ j → (𝑨 
                                              ( λ j → (𝑨 ⟦ t j ⟧) (λ i → (𝑨 ⟦ s i ⟧) as)  )
                                              λ j → subst-lemma-t wd (t j) s 𝑨 as
 
-open import Clones.Basic using ( isClon )
+open import Clones.Basic using ( isClon ; containsCompositions )
+
+TermOpsContainsCompositions : { 𝐹 : signature 𝓞₀ 𝓥₀} → (∀ ℓ ℓ' → swelldef ℓ ℓ' )
+                              → (𝑨 : structure 𝐹 𝑅 {α} {ρ})
+                              ------------------------------------
+                              → containsCompositions (TermOps 𝑨) (TermOps 𝑨)
+TermOpsContainsCompositions wd 𝑨 n m f gs (inj₁ x) tgs = (proj₁ x [ (λ i → proj₁ (tgs i)) ]t) , (λ as → 
+                                                           f (λ i → gs i as)
+                                                         ≡⟨ proj₂ x (λ i → gs i as) ⟩
+                                                            (𝑨 ⟦ proj₁ x ⟧) (λ i → gs i as)
+                                                         ≡⟨ wd _ _ (𝑨 ⟦ proj₁ x ⟧) (λ i → gs i as) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as) (λ i → proj₂ (tgs i ) as) ⟩
+                                                           (𝑨 ⟦ proj₁ x ⟧) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as)
+                                                         ≡⟨ sym (subst-lemma-t (wd _ _) (proj₁ x) (λ i → proj₁ (tgs i)) 𝑨 as) ⟩
+                                                           (𝑨 ⟦ ( (proj₁ x) [ (λ i → proj₁ (tgs i) ) ]t) ⟧ ) as
+                                                         ∎   )
+TermOpsContainsCompositions wd 𝑨 n m f gs (inj₂ (k , pf=π)) tgs = proj₁ (tgs k) , λ as → 
+                                                                     f (λ i → gs i as)
+                                                                   ≡⟨ pf=π (λ i → gs i as) ⟩
+                                                                     π k (λ i → gs i as)
+                                                                   ≡⟨ refl ⟩
+                                                                     gs k as
+                                                                   ≡⟨ proj₂ (tgs k) as ⟩
+                                                                     (𝑨 ⟦ proj₁ (tgs k) ⟧) as
+                                                                   ∎ 
 
 TermOpsIsClon : { 𝐹 : signature 𝓞₀ 𝓥₀} → (∀ ℓ ℓ' → swelldef ℓ ℓ' )
                 → (𝑨 : structure 𝐹 𝑅 {α} {ρ})
                 ------------------------------------
                 → isClon {A = carrier 𝑨} (TermOps 𝑨)
-TermOpsIsClon wd 𝑨 = ( (λ n → λ k → ( Term.ℊ k , λ as →  refl )) ,
-                    λ n m → λ f → λ gs → λ tf → λ tgs → ( (proj₁ tf) [ (λ i → proj₁ (tgs i)) ]t , λ as → 
-                      f (λ i → gs i as)
-                    ≡⟨ proj₂ tf (λ i → gs i as) ⟩
-                      (𝑨 ⟦ proj₁ tf ⟧) (λ i → gs i as)
-                    ≡⟨ wd _ _ (𝑨 ⟦ proj₁ tf ⟧) (λ z → gs z as) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as) (λ i → proj₂ (tgs i ) as) ⟩
-                      (𝑨 ⟦ proj₁ tf ⟧) (λ i → (𝑨 ⟦ proj₁ (tgs i)⟧) as)
-                    ≡⟨ sym (subst-lemma-t (wd _ _) (proj₁ tf) (λ i → proj₁ (tgs i)) 𝑨 as) ⟩
-                      (𝑨 ⟦ ( (proj₁ tf) [ (λ i → proj₁ (tgs i) ) ]t) ⟧ ) as
-                    ∎  ) )
+TermOpsIsClon wd 𝑨 = (λ n k → Term.ℊ k , λ as → refl) ,
+                      TermOpsContainsCompositions wd 𝑨 ,
+                      λ f → λ finTO → λ g f=g → proj₁ finTO , (λ x → 
+                                                                 g x 
+                                                               ≡⟨ sym (f=g x) ⟩
+                                                                 proj₂ f x
+                                                               ≡⟨ proj₂ finTO x ⟩
+                                                                (𝑨 ⟦ proj₁ finTO ⟧) x
+                                                               ∎ )
+
 ```
 
 En varias ocaciones, a partir de un conjunto de operaciones $F$ y uno de relaciones $R$, vamos a querer hablar de la estructura dada por el conjunto $A$ y con el lenguaje que tiene un símbolo para cada operación en $F$ y un símbolo de relación para cada relación en $R$, interpretados de la manera esperable. Denotaremos con ⟨ $A$, $F$, $R$ ⟩ a dicha estructura.
@@ -136,12 +165,51 @@ El clon de las *term-operations* dado por Clo[ $A$ , $F$ ] coincide con el clon 
 
 -- Lema:  [F] = clon(A,F)
 open import Clones.Basic using ( [_] )
+open import Relation.Unary using ( _∈_ )
 
--- TermOps 𝑨 ( n , f ) = Σ[ t ∈ Term (Fin n) ] (∀ as → f as ≡ (𝑨 ⟦ t ⟧) as)
+-- [F]≡Clo[A,F] : (A : Type α) (F : Pred (FinOps A) ρ)
+--                ----------------------
+--                → Clo[ A , F ] ≈ [ F ]
+-- [F]≡Clo[A,F] A F = λ ( n , f ) →  {!!}
+--                                   ≡⟨ {!!} ⟩
+--                                   {!!}
+--                                   ∎
 
-[F]≡Clo[A,F] : (A : Type α) (F : Pred (FinOps A) ρ)
-               ----------------------
-               → Clo[ A , F ] ≈ [ F ]
-[F]≡Clo[A,F] A F = λ ( n , f ) →  {!!}
+
+-- head : {A : Type α} (F : Pred (FinOps A) ρ) → (( n , f ) : FinOps A) → ( n , f ) ∈ [ F ] → Σ[ m ∈ ℕ ] Σ[ g ∈ FinOp {n = m} A ] (( m , g ) ∈ F ⊎ ( m , g ) ∈ Projs)
+-- head F (n , f) ([_].ops x) = {!!} , {!!}
+-- head F (n , .(π k)) ([_].projections .n k) = {!!} , {!!}
+-- head F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs pfin[F] x) = head F ( m , f ) pfin[F]
+
+
+[F]⊆Clo[A,F] : {A : Type α} (F : Pred (FinOps A) ρ) ( ( n , f ) : FinOps A)
+                → ( n , f ) ∈ [ F ]
+                --------------------------
+                → ( n , f ) ∈ Clo[ A , F ]
+[F]⊆Clo[A,F] F (n , f) ([_].ops x) = Term.node ((n , f) , x) (λ k → Term.ℊ k) , λ x₁ → refl
+[F]⊆Clo[A,F] F (n , .(π k)) ([_].projections .n k) =  Term.ℊ k , λ x → refl
+[F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₁ x) x₁) = (Term.node (( m , f ) , x) λ i → proj₁ (ihgs i)) , {!!}
+  where ihgs : ( i : Fin m) → ( n , gs i ) ∈ Clo[ _ , F ]
+        ihgs i = [F]⊆Clo[A,F] F ( n , gs i) (x₁ i)
+[F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₂ (k , pf=π)) x₁) = (Term.node (( m , f ) , {!!})  λ i → proj₁ (ihgs i)) , (λ x → {!!}) -- tengo el problema que no se que la f esté en F 
+  where ihgs : ( i : Fin m) → ( n , gs i ) ∈ Clo[ _ , F ]
+        ihgs i = [F]⊆Clo[A,F] F ( n , gs i) (x₁ i)
+[F]⊆Clo[A,F] F (n , f) ([_].extensionality ( .n , h ) hin[F] .f h=f) = proj₁ ihh , λ x → {!proj₂ ihh!} -- se que son iguales pero no se como decirselo, hay que usar h=f de alguna manera
+  where ihh : ( n , h ) ∈ Clo[ _ , F ]
+        ihh = [F]⊆Clo[A,F] F ( n , h ) hin[F]
+
+
+Clo[A,F]⊆[F] : {A : Type α} (F : Pred (FinOps A) ρ) ( ( n , f ) : FinOps A)
+                → ( n , f ) ∈ Clo[ A , F ]
+                ---------------------------
+                → ( n , f ) ∈ [ F ]
+Clo[A,F]⊆[F] F (n , f) (Term.ℊ k , snd) = [_].extensionality (( n , π k )) ([_].projections n k) f λ x → Eq.sym (snd x) 
+Clo[A,F]⊆[F] {A = A} F (n , f) (Term.node ((m , g) , ginF) t , pf=) = [_].extensionality (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs))) gin[F] f λ x → sym (pf= x) 
+  where iht : (i : Fin m) → (n , (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧)) ∈ [ F ]
+        iht i = Clo[A,F]⊆[F] F (n , (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧)) ((t i) , (λ x → refl))
+        ih' : (i : Fin m) → (f' : FinOp {n = n} A) → f' ≈ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t i ⟧) → (n , f') ∈ [ F ] -- f' x ≡ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t i ⟧) x → (n , )
+        ih' i f' x = Clo[A,F]⊆[F] F (n , f') ((t i) , x)
+        gin[F] : [ F ] (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs)))
+        gin[F] = [_].compositions n m g ( (λ i → (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧))) (inj₁ ginF) λ i → ih' i (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧) {!λ x → refl!} 
 
 ```
