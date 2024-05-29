@@ -181,6 +181,11 @@ open import Relation.Unary using ( _∈_ )
 -- head F (n , .(π k)) ([_].projections .n k) = {!!} , {!!}
 -- head F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs pfin[F] x) = head F ( m , f ) pfin[F]
 
+postulate
+  ext : {A : Type α} {B : Type β} (f g : A → B) → (∀ a → f a ≡ g a) → f ≡ g 
+
+lemma :  {A : Type α} (F : Pred (FinOps A) ρ) (n : ℕ ) ( f g : FinOp {n = n} A) → f ≈ g → (n , f) ∈ Clo[ A , F ] → (n , g) ∈ Clo[ A , F ]
+lemma F n f g f=g (t , f=t) = t , λ x → Eq.trans (sym (f=g x)) (f=t x)
 
 [F]⊆Clo[A,F] : {A : Type α} (F : Pred (FinOps A) ρ) ( ( n , f ) : FinOps A)
                 → ( n , f ) ∈ [ F ]
@@ -188,10 +193,10 @@ open import Relation.Unary using ( _∈_ )
                 → ( n , f ) ∈ Clo[ A , F ]
 [F]⊆Clo[A,F] F (n , f) ([_].ops x) = Term.node ((n , f) , x) (λ k → Term.ℊ k) , λ x₁ → refl
 [F]⊆Clo[A,F] F (n , .(π k)) ([_].projections .n k) =  Term.ℊ k , λ x → refl
-[F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₁ x) x₁) = (Term.node (( m , f ) , x) λ i → proj₁ (ihgs i)) , {!!}
+[F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₁ x) x₁) = (Term.node (( m , f ) , x) λ i → proj₁ (ihgs i)) , λ x₂ → Eq.cong f (ext _ _ λ a → proj₂ (ihgs a) x₂)
   where ihgs : ( i : Fin m) → ( n , gs i ) ∈ Clo[ _ , F ]
         ihgs i = [F]⊆Clo[A,F] F ( n , gs i) (x₁ i)
-[F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₂ (k , pf=π)) x₁) = (Term.node (( m , f ) , {!!})  λ i → proj₁ (ihgs i)) , (λ x → {!!}) -- tengo el problema que no se que la f esté en F 
+[F]⊆Clo[A,F] F (n , .(λ xs → f (λ i → gs i xs))) ([_].compositions .n m f gs (inj₂ (k , pf=π)) x₁) = lemma F n _ _ (λ x → sym (pf=π λ i → gs i x )) (ihgs k) --(Term.node (( m , f ) , {!!})  λ i → proj₁ (ihgs i)) , (λ x → {!!}) -- tengo el problema que no se que la f esté en F 
   where ihgs : ( i : Fin m) → ( n , gs i ) ∈ Clo[ _ , F ]
         ihgs i = [F]⊆Clo[A,F] F ( n , gs i) (x₁ i)
 [F]⊆Clo[A,F] {A = A} F (n , f) ([_].extensionality ( .n , h ) hin[F] .f h=f) = proj₁ ihh , λ x →  f x
@@ -205,13 +210,21 @@ open import Relation.Unary using ( _∈_ )
 
 
 
+aux : {A : Type α} (F : Pred (FinOps A) ρ) (n : ℕ) (t : Term (Fin n) ) (f : FinOp {n = n} A) → f ≈ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t ⟧) → (n , f) ∈ [ F ]
+aux F n (Term.ℊ k) f f=t = [_].extensionality (( n , π k )) ([_].projections n k) f λ x → Eq.sym (f=t x)
+aux {A = A} F n (Term.node ((m , g), ginF) t) f f=t = [_].extensionality (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs))) gin[F] f λ x → sym (f=t x)
+  where ih' : (i : Fin m) → (f' : FinOp {n = n} A) → f' ≈ (⟨ A , F , (λ r → ⊥) ⟩ ⟦ t i ⟧) → (n , f') ∈ [ F ] 
+        ih' i f' x = aux F n (t i) f' x
 
+        gin[F] : [ F ] (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs)))
+        gin[F] = [_].compositions n m g ( (λ i → (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧))) (inj₁ ginF) λ i → ih' i (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) λ x → refl 
 
 Clo[A,F]⊆[F] : {A : Type α} (F : Pred (FinOps A) ρ) ( ( n , f ) : FinOps A)
                 → ( n , f ) ∈ Clo[ A , F ]
                 ---------------------------
                 → ( n , f ) ∈ [ F ]
-Clo[A,F]⊆[F] F (n , f) (Term.ℊ k , snd) = [_].extensionality (( n , π k )) ([_].projections n k) f λ x → Eq.sym (snd x) 
+Clo[A,F]⊆[F] F (n , f) (t , snd) = aux F n t f snd
+{- Clo[A,F]⊆[F] F (n , f) (Term.ℊ k , snd) = [_].extensionality (( n , π k )) ([_].projections n k) f λ x → Eq.sym (snd x) 
 Clo[A,F]⊆[F] {A = A} F (n , f) (Term.node ((m , g) , ginF) t , pf=) = [_].extensionality (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs))) gin[F] f λ x → sym (pf= x) 
   where iht : (i : Fin m) → (n , (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧)) ∈ [ F ]
         iht i = Clo[A,F]⊆[F] F (n , (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧)) ((t i) , (λ x → refl))
@@ -221,5 +234,5 @@ Clo[A,F]⊆[F] {A = A} F (n , f) (Term.node ((m , g) , ginF) t , pf=) = [_].exte
 
         gin[F] : [ F ] (n , (λ xs → g (λ i → (⟨ A , F , R∅ ⟩ ⟦ t i ⟧) xs)))
         gin[F] = [_].compositions n m g ( (λ i → (⟨ A , F , R∅ {A = A} ⟩ ⟦ t i ⟧))) (inj₁ ginF) {!!} 
-
+-}
 ```
