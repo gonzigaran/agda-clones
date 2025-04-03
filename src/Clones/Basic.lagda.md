@@ -116,8 +116,16 @@ data [_] {A : Type α} (F : Pred (FinOps A) ρ) : Pred (FinOps A) (suc Level.zer
     compositions : containsCompositions F [ F ]
     extensionality : containsExtensionality [ F ]
 
--- GeneratedClonIsClon : {A : Type α} {F : Pred (FinOps A) ρ} → isClon {A = A} [ F ]
--- GeneratedClonIsClon = projections , compositions , extensionality
+GeneratedClonIsClon : {A : Type α} {F : Pred (FinOps A) ρ} → isClon {A = A} [ F ]
+GeneratedClonIsClon {F = F} = projections , comp , extensionality
+  where comp : containsCompositions [ F ] [ F ]
+        comp n m f gs (inj₁ (ops x)) x₁ = compositions n m f gs (inj₁ x) x₁
+        comp n m .(π k) gs (inj₁ (projections .m k)) x₁ = x₁ k
+        comp n m .(λ xs → f (λ i → gs₁ i xs)) gs (inj₁ (compositions .m m₁ f gs₁ x x₂)) x₁ =
+               compositions n m₁ f (λ k -> λ l -> gs₁ k (λ z → gs z l) ) x (λ k ->
+                     comp n m₁ {!!} (λ z z₁ → gs₁ z (λ z₂ → f (λ _ → gs z₂ z₁))) {!!} {!!})
+        comp n .m f gs (inj₁ (extensionality (m , h) x .f x₂)) x₁ = {!!}
+        comp n m f gs (inj₂ (k , pf=π)) x₁ = compositions n m f gs (inj₂ (k , pf=π)) x₁
 
 π1 : {A : Type α} {n : ℕ} (F : Pred (FinOps A) ρ) → ( ℕ.suc n , π {n = ℕ.suc n} Fin.zero ) ∈ [ F ]
 π1 {n = n} F = projections (ℕ.suc n) Fin.zero
